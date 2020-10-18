@@ -49,8 +49,9 @@ class Player:
         elif self.direction == 'RIGHT':
             surface.blit(self.rightimg,(self.x,self.y)) 
 
+
+
 class Button():
-    #def __init__(self, color, width, height):
     def __init__(self, _action, _x, _y):
         self.img = pygame.image.load(r'./data/images/buttons/' + _action + '.png')
         self.action = _action
@@ -69,10 +70,11 @@ class Button():
                 return True
         return False
 
+
+
 class PlayerButton():
-    #def __init__(self, color, width, height):
     def __init__(self, _color, _name='', _x=0, _y=0):
-        self.img = pygame.image.load(r'./data/images/players/' + _color + '_small.png')
+        self.img = pygame.image.load(r'./data/images/players/' + _color + '_tn.png')
         self.lbl = _name
         self.color = _color
         self.x = _x
@@ -99,6 +101,10 @@ class PlayerButton():
                 return True
         return False
 
+
+
+
+
 class App:
 
     windowWidth = 1200
@@ -112,8 +118,7 @@ class App:
         self.running = True
         self.display_surf = None
         self.image_surf = None
-        com = Player('Common', 'red')
-        self.players = {"Common":com}
+        self.players = {}
         self.menu = 'WELCOME'
 
         #read in the player information
@@ -123,13 +128,16 @@ class App:
             _pn = _p.get('name')
             _pc = _p.get('color')
             new_plyr = Player(_pn, _pc)
-            _tasks = _p.find('Tasks').findall('Task')
-            for _t in _tasks:
+            _xmltasks = _p.find('Tasks').findall('Task')
+            tasks = []
+            for _t in _xmltasks:
                 _tn = _t.get('name')
                 _tl = _t.get('location')
-                _tc = int(_t.get('completion'))
-                new_plyr.tasks.append(Task(_tn, _tl, _tc))
+                _tc = _t.get('completion')
+                tasks.append(Task(_tn, _tl, _tc))
+            new_plyr.tasks = tasks
             self.players[new_plyr.name] = new_plyr
+        self.player = self.players['Common']
         
         #for p in self.players:
         #    print("Players:")
@@ -145,7 +153,7 @@ class App:
         self.btn_plyrsel = Button('select', 400, 356)
         self.btn_tasks = Button('tasks', 606, 356)
 
-        self.player = None #self.players[0]
+        
  
     def on_init(self):
         pygame.init()
@@ -166,6 +174,7 @@ class App:
 
  
     def on_render(self):
+        
         if self.menu == 'WELCOME':
             self.plyrbtns.clear()
             self.display_surf.blit(self.bg, (0, 0))
@@ -176,22 +185,32 @@ class App:
             pby = 100
             yofs = 0
             for pn, po in self.players.items():
-                if pn != 'Common':
-                    _btn = po.btn_choose
-                    _btn.x = pbx
-                    _btn.y = pby + yofs
-                    yofs = yofs + 154
-                    _btn.draw(self.display_surf, po.chosen)
+                #if pn != 'Common':
+                _btn = po.btn_choose
+                _btn.x = pbx
+                _btn.y = pby + yofs
+                yofs = yofs + 94
+                _btn.draw(self.display_surf, po.chosen)
 
             self.btn_plyrsel.draw(self.display_surf)
             self.btn_tasks.draw(self.display_surf)
+            
         if self.menu == 'TASKS':
                 self.display_surf.blit(self.bg, (0, 0))
                 _font = pygame.font.SysFont('Comic Sans MS', 26)
-                lbl1 = _font.render('Task1', False, (255, 255, 255))
-                lbl2 = _font.render('Task2', False, (255, 255, 255))
-                self.display_surf.blit(lbl1, (60,30))
-                self.display_surf.blit(lbl2, (60,60))
+
+                _lbl = _font.render('Tasks:' , False, (255, 255, 255))
+                self.display_surf.blit(_lbl, (60,60))
+                    
+                _x = 60
+                _y = 100
+                _yofs = 40
+                for t in self.player.tasks:
+                    #print(t)
+                    _strtsk = t.location + ' - ' + t.name + '. Complete: ' + t.completion
+                    _lbl = _font.render(_strtsk , False, (255, 255, 255))
+                    self.display_surf.blit(_lbl, (_x,_y))
+                    _y = _y + _yofs
             
         pygame.display.flip()
 
@@ -228,15 +247,20 @@ class App:
                     # SELECT
                     if self.btn_plyrsel.rect.collidepoint(mspos):
                         print('Click!')
+                        self.menu = 'TASKS'
+                        self.bg = pygame.image.load(r'.\data\images\bg_sparse.png')
                     # TASKS
                     if self.btn_tasks.rect.collidepoint(mspos):
                         self.menu = 'TASKS'
-                        print(self.menu)
+                        self.bg = pygame.image.load(r'.\data\images\bg_sparse.png')
                     # EXIT
                     exit_rect = pygame.Rect(76, 540, 100, 50)
                     if exit_rect.collidepoint(mspos):
-                        self.running = False
-                        print('Exit!')
+                        if self.menu == 'TASKS':
+                            self.menu = 'WELCOME'
+                        elif self.menu == 'WELCOME':
+                            print('Exit!')
+                            self.running = False
                     print(mspos)
 
             pygame.event.pump()

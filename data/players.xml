@@ -3,16 +3,24 @@
     <Player name="Sully" color="blue">
         <Tasks>
             <Task name="Do dishes" location="Kitchen" completion="0"/>
+            <Task name="Do pullups" location="Kitchen" completion="0"/>
         </Tasks>
     </Player>
     <Player name="Baby" color="pink">
         <Tasks>
             <Task name="Vacuum" location="Everywhere" completion="0"/>
+            <Task name="Make sandwiches" location="Kitchen" completion="0"/>
         </Tasks>
     </Player>
     <Player name="Lilah" color="purple">
         <Tasks>
             <Task name="Feed birds" location="Living room" completion="0"/>
+        </Tasks>
+    </Player>
+    <Player name="Common" color="cyan">
+        <Tasks>
+            <Task name="Feed Monty" location="Living room" completion="0"/>
+            <Task name="Sweep" location="Living room" completion="0"/>
         </Tasks>
     </Player>
 </Players>
