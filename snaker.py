@@ -71,15 +71,18 @@ class App:
     windowHeight = 600
     bg = pygame.image.load(r'.\data\images\bg_welcome.png')
     players = []
-    mspos = (0,0)
  
     def __init__(self):
         self.running = True
         self.display_surf = None
         self.image_surf = None
         self.players = []
-        self.btn_plyrsel = Button('select', 100, 100)
 
+        #format the menus
+        self.btn_plyrsel = Button('select', 400, 356)
+        self.btn_tasks = Button('tasks', 606, 356)
+
+        #read in the player information
         tree = ET.parse('.\data\players.xml')
         _players = tree.getroot().findall('Player')
         for _p in _players:
@@ -119,6 +122,7 @@ class App:
             self.running = False
  
     def on_loop(self):
+        
         pass
         
 
@@ -128,8 +132,13 @@ class App:
         text_hello = self.myfont.render('Welcome ' + self.player.name, False, (255, 255, 255))
         self.display_surf.blit(text_hello, (200,200))
         self.player.draw(self.display_surf)
+        
         self.btn_plyrsel.draw(self.display_surf)
+        self.btn_tasks.draw(self.display_surf)
         pygame.display.flip()
+
+
+
  
     def on_cleanup(self):
         pygame.quit()
@@ -141,24 +150,38 @@ class App:
         while( self.running ):
             ev = pygame.event.get()
 
-            # proceed events
             for event in ev:
                 # handle MOUSEBUTTONUP
                 if event.type == pygame.MOUSEBUTTONUP:
-                    self.mspos = pygame.mouse.get_pos()
+                    mspos = pygame.mouse.get_pos()
+                    if self.btn_plyrsel.rect.collidepoint(mspos):
+                        print('Click!')
+                    if self.btn_tasks.rect.collidepoint(mspos):
+                        print('Tasks!')
+                    exit_rect = pygame.Rect(76, 540, 100, 50)
+                    if exit_rect.collidepoint(mspos):
+                        self.running = False
+                        print('Exit!')
+                    print(mspos)
 
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RIGHT:
-                        self.player.moveRight()
-                    if event.key == pygame.K_LEFT:
-                        self.player.moveLeft()
-                    if event.key == pygame.K_UP:
-                        self.player.moveUp()
-                    if event.key == pygame.K_DOWN:
-                        self.player.moveDown()
-                    if event.key == pygame.K_ESCAPE:
-                        self.running = False    
-            
+            pygame.event.pump()
+            keys = pygame.key.get_pressed() 
+ 
+            if (keys[K_RIGHT]):
+                self.player.moveRight()
+ 
+            if (keys[K_LEFT]):
+                self.player.moveLeft()
+ 
+            if (keys[K_UP]):
+                self.player.moveUp()
+ 
+            if (keys[K_DOWN]):
+                self.player.moveDown()
+ 
+            if (keys[K_ESCAPE]):
+                self.running = False
+
             self.on_loop()
             self.on_render()
  
