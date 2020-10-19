@@ -12,15 +12,22 @@
             <Task name="Make sandwiches" location="Kitchen" completion="0"/>
         </Tasks>
     </Player>
+    <Player name="Nahla" color="cyan">
+        <Tasks>
+            <Task name="Find imposter" location="Everywhere" completion="0"/>
+            <Task name="Make the bed" location="Bedroom" completion="0"/>
+        </Tasks>
+    </Player>
     <Player name="Lilah" color="purple">
         <Tasks>
             <Task name="Feed birds" location="Living room" completion="0"/>
+            <Task name="Put away shoes" location="Everywhere" completion="0"/>
         </Tasks>
     </Player>
-    <Player name="Common" color="cyan">
+    <Player name="Common" color="white">
         <Tasks>
             <Task name="Feed Monty" location="Living room" completion="0"/>
-            <Task name="Sweep" location="Living room" completion="0"/>
+            <Task name="Sweep" location="Living room" completion="1"/>
         </Tasks>
     </Player>
 </Players>
