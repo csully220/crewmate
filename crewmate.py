@@ -2,14 +2,14 @@ import pygame
 from pygame.locals import *
 import time
 import xml.etree.ElementTree as ET
-
+from auwidgets import *
 
 class Task:
-    def __init__(self, _name, _location, _completion):
+    def __init__(self, _name, _location, _completion, _owner):
         self.name = _name
+        self.owner = _owner
         self.location = _location
         self.completion = _completion
-        self.btn_complete = Checkbox()
 
 class Player:
     step = 10
@@ -51,93 +51,24 @@ class Player:
             surface.blit(self.rightimg,(self.x,self.y)) 
 
 
-class Checkbox():
-    def __init__(self, _checked=False, _x=0, _y=0):
-        self.checked = _checked
-        if(self.checked):
-            self.img = pygame.image.load(r'./data/images/buttons/check.png')
-        else:
-            self.img = pygame.image.load(r'./data/images/buttons/nocheck.png')
-        self.x = _x
-        self.y = _y
-        self.w = 40 
-        self.h = 40
-        self.rect = pygame.Rect(_x, _y, self.w, self.h)
-
-    def draw(self, surface, _checked=False):
-        if _checked:
-            self.img = pygame.image.load(r'./data/images/buttons/check.png')
-        else:
-            self.img = pygame.image.load(r'./data/images/buttons/nocheck.png')
-        surface.blit(self.img,(self.x,self.y))
-
-
-class Button():
-    def __init__(self, _action, _x, _y):
-        self.img = pygame.image.load(r'./data/images/buttons/' + _action + '.png')
-        self.action = _action
-        self.x = _x
-        self.y = _y
-        self.w = 192
-        self.h = 80
-        self.rect = pygame.Rect(_x, _y, self.w, self.h)
-
-    def draw(self, surface):
-        surface.blit(self.img,(self.x,self.y))
-
-
-
-class PlayerButton():
-    def __init__(self, _color, _name='', _x=0, _y=0):
-        self.img = pygame.image.load(r'./data/images/players/' + _color + '_tn.png')
-        self.lbl = _name
-        self.color = _color
-        self.x = _x
-        self.y = _y
-        self.w = 90
-        self.h = 120
-        self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
-
-    def get_rect(self):
-        return pygame.Rect(self.x, self.y, self.w, self.h)
-
-    def draw(self, surface, chosen=False):
-        _font = pygame.font.SysFont('Comic Sans MS', 26)
-        #_lbl = _font.render(self.lbl, False, (255, 255, 255))
-        _color = Color(255, 255, 255)
-        if(chosen):
-            _color = Color(255, 255, 20)
-        _lbl = _font.render(self.lbl, False, _color)
-        
-        surface.blit(_lbl, (self.x,self.y))
-        surface.blit(self.img,(self.x,self.y + 36))
-        
-    def clicked(self,x1,y1,x2,y2,bsize):
-        if x1 >= x2 and x1 <= x2 + bsize:
-            if y1 >= y2 and y1 <= y2 + bsize:
-                return True
-        return False
-
-
-
-
-
 class App:
 
     windowWidth = 1200
     windowHeight = 600
     bg = pygame.image.load(r'.\data\images\bg_welcome.png')
-    players = []
+    players = {}
     plyrbtns = []
     tskbtns = []
-    menu = ''
+    buttons = []
+    
  
     def __init__(self):
+        self.clock = pygame.time.Clock()
         self.running = True
         self.display_surf = None
         self.image_surf = None
         self.players = {}
-        self.menu = 'WELCOME'
+
 
         #read in the player information
         tree = ET.parse('.\data\players.xml')
@@ -152,7 +83,7 @@ class App:
                 _tn = _t.get('name')
                 _tl = _t.get('location')
                 _tc = int(_t.get('completion'))
-                tasks.append(Task(_tn, _tl, _tc))
+                tasks.append(Task(_tn, _tl, _tc, _pn))
             new_plyr.tasks = tasks
             self.players[new_plyr.name] = new_plyr
         self.player = self.players['Common']
@@ -171,14 +102,19 @@ class App:
         self.btn_plyrsel = Button('select', 400, 356)
         self.btn_tasks = Button('tasks', 606, 356)
 
-        
- 
+
     def on_init(self):
         pygame.init()
         pygame.font.init()
-        self.myfont = pygame.font.SysFont('Comic Sans MS', 40)
+
+        self.menu = 'WELCOME'
+        self.lastMenu = 'NONE'
+        self.font_sm = pygame.font.SysFont('Comic Sans MS', 26)
+        self.font_med = pygame.font.SysFont('Comic Sans MS', 32)
+        self.font_lg = pygame.font.SysFont('Comic Sans MS', 40)
+        
         self.display_surf = pygame.display.set_mode((self.windowWidth,self.windowHeight), pygame.RESIZABLE)
-        pygame.display.set_caption('Among Us Crewmate Simulator')
+        pygame.display.set_caption('Crewmate IRL Task Simulator')
         self.running = True
  
     def on_event(self, event):
@@ -186,70 +122,93 @@ class App:
             self.running = False
  
     def on_loop(self):
-        
-        pass
-        
+        if self.menu != self.lastMenu:
+            self.lastMenu = self.menu
+            self.plyrbtns.clear()
+            self.buttons.clear()
+            self.tskbtns.clear()
+            
+            if self.menu == 'WELCOME':
 
+                #self.player.draw(self.display_surf)
+                pbx = 60
+                pby = 100
+                yofs = 0
+                i = 0
+                for pn, po in self.players.items():
+                    #if pn != 'Common':
+                    _btn = po.btn_choose
+                    if i == 4:
+                        pby = 100
+                        pbx = 150
+                        yofs = 0
+                    _btn.x = pbx
+                    _btn.y = pby + yofs
+                    yofs = yofs + 94
+                    #_btn.draw(self.display_surf, po.chosen)
+                    i += 1;
+                    self.addWidget(_btn)
+
+                self.addWidget(self.btn_plyrsel)
+                self.addWidget(self.btn_tasks)
+
+            elif self.menu == 'TASKS':
+                _x = 60
+                _y = 160
+                _yofs = 40
+                # Player tasks
+                
+                _y += 40
+                _x += 30
+                for _t in self.player.tasks:
+                    #print(t)
+                    _strtsk = _t.location + ' - ' + _t.name
+                    _color = white
+                    if _t.completion:
+                        _color = green
+                    _chkbx = Checkbox()
+                    _chkbx.desc = _strtsk
+                    _chkbx.checked = (_t.completion == 1)
+                    _chkbx.x = _x - 30
+                    _chkbx.y = _y + 12
+                    _y = _y + _yofs
+                    self.addWidget(_chkbx)
+                    
  
     def on_render(self):
-        
+        self.display_surf.blit(self.bg, (0, 0))
+        # Render Welcome Screen
         if self.menu == 'WELCOME':
-            self.plyrbtns.clear()
             self.display_surf.blit(self.bg, (0, 0))
-            lbl_plyrsel = self.myfont.render('Select Player', False, (255, 255, 255))
-            self.display_surf.blit(lbl_plyrsel, (60,30))
-            lbl_plyrsel = self.myfont.render('Crewmate IRL Task Simulator', False, (255, 255, 255))
-            self.display_surf.blit(lbl_plyrsel, (320,220))
-            #self.player.draw(self.display_surf)
-            pbx = 60
-            pby = 100
-            yofs = 0
-            i = 0
-            for pn, po in self.players.items():
-                #if pn != 'Common':
-                _btn = po.btn_choose
-                if i == 4:
-                    pby = 100
-                    pbx = 150
-                    yofs = 0
-                _btn.x = pbx
-                _btn.y = pby + yofs
-                yofs = yofs + 94
-                _btn.draw(self.display_surf, po.chosen)
-                i += 1;
-
+            self.display_surf.blit(self.font_med.render('Select Player', False, white), (60,30))
+            self.display_surf.blit(self.font_lg.render('Crewmate IRL Task Simulator', False, white), (320,220))
+            for _pb in self.plyrbtns:
+                _pb.draw(self.display_surf, self.players[_pb.lbl].chosen)
             self.btn_plyrsel.draw(self.display_surf)
             self.btn_tasks.draw(self.display_surf)
-            
-        elif self.menu == 'TASKS':
-            self.tskbtns.clear()
-            self.display_surf.blit(self.bg, (0, 0))
-            _font = pygame.font.SysFont('Comic Sans MS', 26)
-            _lbl = _font.render('Your Tasks:' , False, (255, 255, 255))
-            self.display_surf.blit(_lbl, (60,60))
-                
-            _x = 90
-            _y = 100
-            _yofs = 40
-            # Player tasks
-            for t in self.player.tasks:
-                #print(t)
-                _strtsk = t.location + ' - ' + t.name
-                _color = Color(255, 255, 255)
-                if t.completion:
-                    _color = Color(255, 255, 20)
-                _lbl = _font.render(_strtsk , False, _color)
-                self.display_surf.blit(_lbl, (_x,_y))
-                
-                _chkbx = t.btn_complete
-                _chkbx.x = _x - 30
-                _chkbx.y = _y + 12
-                _chkbx.draw(self.display_surf, t.completion)
-                self.tskbtns.append(_chkbx)
-                _y = _y + _yofs
-  
-        pygame.display.flip()
 
+        # Render Task List Screen
+        elif self.menu == 'TASKS':
+            self.display_surf.blit(self.bg, (0, 0))
+            # calculate amount of fill
+            tot_tsks = len(self.player.tasks)
+            comp_tsks = 0
+            for t in self.player.tasks:
+                if t.completion == 1:
+                    comp_tsks += 1
+            ratio = comp_tsks/tot_tsks
+            fill_w = 845
+            scaled_w = round(fill_w * ratio)
+            
+            tbar = pygame.image.load(r'.\data\images\taskbar.png')
+            tbar_fill= pygame.Rect(66, 66, scaled_w, 68)
+            self.display_surf.blit(tbar, (60, 60))
+            pygame.draw.rect(self.display_surf, green, tbar_fill)
+            self.display_surf.blit(tbar, (60, 60))
+            self.display_surf.blit(self.font_med.render('Your Tasks:' , False, white), (60,160))
+            for _t in self.tskbtns:
+                _t.draw(self.display_surf)
+        pygame.display.flip()
 
 
     def on_cleanup(self):
@@ -307,6 +266,7 @@ class App:
                                 elif self.player.tasks[idx].completion == 0:
                                     self.player.tasks[idx].completion = 1
                                     print('Task complete')
+                                self.lastMenu = 'NONE'
                             idx += 1
                         # EXIT
                         exit_rect = pygame.Rect(76, 540, 100, 50)
@@ -335,9 +295,22 @@ class App:
 
             self.on_loop()
             self.on_render()
- 
-            time.sleep (50.0 / 1000.0);
+
+            self.clock.tick(30)
+            #time.sleep (50.0 / 1000.0);
         self.on_cleanup()
+        
+    def addWidget(self, widget):
+        if type(widget) == Checkbox:
+            print('Checkbox')
+            self.tskbtns.append(widget)
+        if type(widget) == Button:
+            print('Button')
+            self.buttons.append(widget)
+        if type(widget) == PlayerButton:
+            print('Player Button')
+            self.plyrbtns.append(widget)   
+
  
 if __name__ == "__main__" :
     theApp = App()
