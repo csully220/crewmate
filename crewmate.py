@@ -11,44 +11,77 @@ class Task:
         self.location = _location
         self.completion = _completion
 
-class Player:
+class Player(pygame.sprite.Sprite):
     step = 10
     direction = 'RIGHT'
     chosen = False
     
     def __init__(self, _name, _color, _tasks=[]):
+        super().__init__()
         self.name = _name
         self.color = _color
         self.tasks = _tasks
         _plyrimgstr = './data/images/players/' + _color + '_small.png'
         #_plyrimgstr = './data/red_plyr.png'
-        self.leftimg = pygame.image.load(_plyrimgstr)
+        self.leftimg = pygame.image.load(_plyrimgstr).convert()
         self.rightimg = pygame.transform.flip(self.leftimg, True, False)
         self.img = self.rightimg
+        self.image = self.rightimg
         self.x = 100
         self.y = 100
-
+        self.dx = 0
+        self.dy = 0
+        self.rect = self.image.get_rect()
+        self.rect.x = 600
+        self.rect.y = 150
         self.btn_choose = PlayerButton(self.color,self.name)
 
     def moveRight(self):
-        self.x = self.x + self.step
+        if self.dx < 5:
+            self.dx = self.dx + 1
         self.direction = 'LEFT'
  
     def moveLeft(self):
-        self.x = self.x - self.step
+        if self.dx > -5:
+            self.dx = self.dx - 1
+        #self.x = self.x - self.step
         self.direction = 'RIGHT'
  
     def moveUp(self):
-        self.y = self.y - self.step
+        #if self.dy > -5:
+            self.dy = self.dy - 1
+        #self.y = self.y - self.step
  
     def moveDown(self):
-        self.y = self.y + self.step
+        #if self.dy < 5:
+            self.dy = self.dy + 1
+        #self.y = self.y + self.step
+
+    def stop(self):
+        self.dx = 0
+        self.dy = 0
  
-    def draw(self, surface):
-        if self.direction == 'LEFT':
-            surface.blit(self.leftimg,(self.x,self.y))
-        elif self.direction == 'RIGHT':
-            surface.blit(self.rightimg,(self.x,self.y)) 
+    def update(self):
+        if self.rect.x > 0 and self.rect.x < 1200:
+            self.rect.x += self.dx
+        if self.rect.y > 0 and self.rect.y < 600:
+            self.rect.y += self.dy
+        #k = 1
+        #if self.dx < 0:
+        #    self.dx += k
+        #if self.dx > 0:
+        #    self.dx -= k
+        #if self.dy < 0:
+        #   self.dy += k
+        #if self.dy > 0:
+        #    self.dy -= k
+
+
+    #def draw(self, surface):
+    #    if self.direction == 'LEFT':
+    #        surface.blit(self.leftimg,(self.x,self.y))
+    #   elif self.direction == 'RIGHT':
+    #       surface.blit(self.rightimg,(self.x,self.y)) 
 
 
 class App:
@@ -68,26 +101,7 @@ class App:
         self.display_surf = None
         self.image_surf = None
         self.players = {}
-        self.block_list = pygame.sprite.Group()
-        self.all_sprites_list = pygame.sprite.Group()
-
-        #read in the player information
-        tree = ET.parse('.\data\players.xml')
-        _players = tree.getroot().findall('Player')
-        for _p in _players:
-            _pn = _p.get('name')
-            _pc = _p.get('color')
-            new_plyr = Player(_pn, _pc)
-            _xmltasks = _p.find('Tasks').findall('Task')
-            tasks = []
-            for _t in _xmltasks:
-                _tn = _t.get('name')
-                _tl = _t.get('location')
-                _tc = int(_t.get('completion'))
-                tasks.append(Task(_tn, _tl, _tc, _pn))
-            new_plyr.tasks = tasks
-            self.players[new_plyr.name] = new_plyr
-        self.player = self.players['Common']
+        self.sprites = pygame.sprite.Group()
         
         #for p in self.players:
         #    print("Players:")
@@ -107,15 +121,37 @@ class App:
     def on_init(self):
         pygame.init()
         pygame.font.init()
-
+        self.display_surf = pygame.display.set_mode((self.windowWidth,self.windowHeight), pygame.RESIZABLE)
+        pygame.display.set_caption('Crewmate IRL Task Simulator')
+        
+        #read in the player information
+        tree = ET.parse('.\data\players.xml')
+        _players = tree.getroot().findall('Player')
+        for _p in _players:
+            _pn = _p.get('name')
+            _pc = _p.get('color')
+            new_plyr = Player(_pn, _pc)
+            _xmltasks = _p.find('Tasks').findall('Task')
+            tasks = []
+            for _t in _xmltasks:
+                _tn = _t.get('name')
+                _tl = _t.get('location')
+                _tc = int(_t.get('completion'))
+                tasks.append(Task(_tn, _tl, _tc, _pn))
+            new_plyr.tasks = tasks
+            self.players[new_plyr.name] = new_plyr
+        self.player = self.players['Common']
+        
         self.menu = 'WELCOME'
         self.lastMenu = 'NONE'
         self.font_sm = pygame.font.SysFont('Comic Sans MS', 26)
         self.font_med = pygame.font.SysFont('Comic Sans MS', 32)
         self.font_lg = pygame.font.SysFont('Comic Sans MS', 40)
         
-        self.display_surf = pygame.display.set_mode((self.windowWidth,self.windowHeight), pygame.RESIZABLE)
-        pygame.display.set_caption('Crewmate IRL Task Simulator')
+
+        #print(self.player.name)
+        self.sprites.add(self.player)
+        
         self.running = True
  
     def on_event(self, event):
@@ -123,6 +159,7 @@ class App:
             self.running = False
  
     def on_loop(self):
+        self.sprites.update()
         if self.menu != self.lastMenu:
             self.lastMenu = self.menu
             self.plyrbtns.clear()
@@ -174,7 +211,7 @@ class App:
                     _chkbx.y = _y + 12
                     _y = _y + _yofs
                     self.addWidget(_chkbx)
- 
+
     def on_render(self):
         self.display_surf.blit(self.bg, (0, 0))
         # Render Welcome Screen
@@ -208,6 +245,7 @@ class App:
             self.display_surf.blit(self.font_med.render('Your Tasks:' , False, white), (60,160))
             for _t in self.tskbtns:
                 _t.draw(self.display_surf)
+        self.sprites.draw(self.display_surf)
         pygame.display.flip()
 
 
@@ -219,6 +257,7 @@ class App:
             self.running = False
  
         while( self.running ):
+            pygame.event.pump()
             ev = pygame.event.get()
 
             for event in ev:
@@ -277,24 +316,45 @@ class App:
                             self.menu = 'WELCOME'
                             self.bg = pygame.image.load(r'.\data\images\bg_welcome.png')
                     print(mspos)
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RIGHT:
+                        self.player.moveRight()
+                        print('right')
+                    if event.key == pygame.K_LEFT:
+                        self.player.moveLeft()
+                        print('left')
+                    if event.key == pygame.K_UP:
+                        self.player.moveUp()
+                        print('up')
+                    if event.key == pygame.K_DOWN:
+                        self.player.moveDown()
+                        print('down')
+                    if event.key == pygame.K_SPACE:
+                        self.player.stop()
+                    if event.key == pygame.K_ESCAPE:
+                        self.running = False
+                        
 
-            pygame.event.pump()
-            keys = pygame.key.get_pressed() 
- 
-            if (keys[K_RIGHT]):
-                self.player.moveRight()
- 
-            if (keys[K_LEFT]):
-                self.player.moveLeft()
- 
-            if (keys[K_UP]):
-                self.player.moveUp()
- 
-            if (keys[K_DOWN]):
-                self.player.moveDown()
- 
-            if (keys[K_ESCAPE]):
-                self.running = False
+##            keys = pygame.key.get_pressed() 
+## 
+##            if (keys[K_RIGHT]):
+##                self.player.moveRight()
+## 
+##            if (keys[K_LEFT]):
+##                self.player.moveLeft()
+## 
+##            if (keys[K_UP]):
+##                self.player.moveUp()
+## 
+##            if (keys[K_DOWN]):
+##                self.player.moveDown()
+##            if (keys[K_SPACE]):
+##                self.player.stop()
+##            if (keys[K_ESCAPE]):
+##                self.running = False
+                
+
+
 
             self.on_loop()
             self.on_render()
@@ -305,13 +365,13 @@ class App:
         
     def addWidget(self, widget):
         if type(widget) == Checkbox:
-            print('Checkbox')
+            #print('Checkbox')
             self.tskbtns.append(widget)
         if type(widget) == Button:
-            print('Button')
+            #print('Button')
             self.buttons.append(widget)
         if type(widget) == PlayerButton:
-            print('Player Button')
+            #print('Player Button')
             self.plyrbtns.append(widget)   
 
  
