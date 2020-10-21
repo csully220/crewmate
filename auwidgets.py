@@ -15,17 +15,13 @@ class Taskbar():
         self.h = 75
         self.rect = pygame.Rect(_x, _y, self.w, self.h)
 
-    def draw(self, surface, _checked=False):
+    def draw(self, surface):
         surface.blit(self.img,(self.x,self.y))
 
 class Checkbox():
     def __init__(self, _checked=False, _desc='', _x=0, _y=0):
         self.checked = _checked
         self.desc = _desc
-        if(self.checked):
-            self.img = pygame.image.load(r'./data/images/buttons/check.png')
-        else:
-            self.img = pygame.image.load(r'./data/images/buttons/nocheck.png')
         self.x = _x
         self.y = _y
         self.w = 40 
@@ -69,7 +65,7 @@ class Button():
 class PlayerButton():
     def __init__(self, _color, _name='', _x=0, _y=0):
         self.img = pygame.image.load(r'./data/images/players/' + _color + '_tn.png')
-        self.lbl = _name
+        self.name = _name
         self.color = _color
         self.x = _x
         self.y = _y
@@ -86,7 +82,7 @@ class PlayerButton():
         _color = white
         if(chosen):
             _color = green
-        _lbl = _font.render(self.lbl, False, _color)
+        _lbl = _font.render(self.name, False, _color)
         
         surface.blit(_lbl, (self.x,self.y))
         surface.blit(self.img,(self.x,self.y + 36))

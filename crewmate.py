@@ -3,86 +3,7 @@ from pygame.locals import *
 import time
 import xml.etree.ElementTree as ET
 from auwidgets import *
-
-class Task:
-    def __init__(self, _name, _location, _completion, _owner):
-        self.name = _name
-        self.owner = _owner
-        self.location = _location
-        self.completion = _completion
-
-class Player(pygame.sprite.Sprite):
-    step = 10
-    direction = 'RIGHT'
-    chosen = False
-    
-    def __init__(self, _name, _color, _tasks=[]):
-        super().__init__()
-        self.name = _name
-        self.color = _color
-        self.tasks = _tasks
-        _plyrimgstr = './data/images/players/' + _color + '_small.png'
-        #_plyrimgstr = './data/red_plyr.png'
-        self.leftimg = pygame.image.load(_plyrimgstr).convert()
-        self.rightimg = pygame.transform.flip(self.leftimg, True, False)
-        self.img = self.rightimg
-        self.image = self.rightimg
-        self.x = 100
-        self.y = 100
-        self.dx = 0
-        self.dy = 0
-        self.rect = self.image.get_rect()
-        self.rect.x = 600
-        self.rect.y = 150
-        self.btn_choose = PlayerButton(self.color,self.name)
-
-    def moveRight(self):
-        if self.dx < 5:
-            self.dx = self.dx + 1
-        self.direction = 'LEFT'
- 
-    def moveLeft(self):
-        if self.dx > -5:
-            self.dx = self.dx - 1
-        #self.x = self.x - self.step
-        self.direction = 'RIGHT'
- 
-    def moveUp(self):
-        #if self.dy > -5:
-            self.dy = self.dy - 1
-        #self.y = self.y - self.step
- 
-    def moveDown(self):
-        #if self.dy < 5:
-            self.dy = self.dy + 1
-        #self.y = self.y + self.step
-
-    def stop(self):
-        self.dx = 0
-        self.dy = 0
- 
-    def update(self):
-        if self.rect.x > 0 and self.rect.x < 1200:
-            self.rect.x += self.dx
-        if self.rect.y > 0 and self.rect.y < 600:
-            self.rect.y += self.dy
-        #k = 1
-        #if self.dx < 0:
-        #    self.dx += k
-        #if self.dx > 0:
-        #    self.dx -= k
-        #if self.dy < 0:
-        #   self.dy += k
-        #if self.dy > 0:
-        #    self.dy -= k
-
-
-    #def draw(self, surface):
-    #    if self.direction == 'LEFT':
-    #        surface.blit(self.leftimg,(self.x,self.y))
-    #   elif self.direction == 'RIGHT':
-    #       surface.blit(self.rightimg,(self.x,self.y)) 
-
+from auplayer import *
 
 class App:
 
@@ -125,8 +46,8 @@ class App:
         pygame.display.set_caption('Crewmate IRL Task Simulator')
         
         #read in the player information
-        tree = ET.parse('.\data\players.xml')
-        _players = tree.getroot().findall('Player')
+        self.tree = ET.parse('.\data\players.xml')
+        _players = self.tree.getroot().findall('Player')
         for _p in _players:
             _pn = _p.get('name')
             _pc = _p.get('color')
@@ -137,6 +58,7 @@ class App:
                 _tn = _t.get('name')
                 _tl = _t.get('location')
                 _tc = int(_t.get('completion'))
+                print('completion ' + str(_tc))
                 tasks.append(Task(_tn, _tl, _tc, _pn))
             new_plyr.tasks = tasks
             self.players[new_plyr.name] = new_plyr
@@ -175,7 +97,7 @@ class App:
                 i = 0
                 for pn, po in self.players.items():
                     if pn != 'Common':
-                        _btn = po.btn_choose
+                        _btn = PlayerButton(po.color, po.name)
                         if i == 4:
                             pby = 100
                             pbx = 150
@@ -201,14 +123,12 @@ class App:
                 for _t in self.player.tasks:
                     #print(t)
                     _strtsk = _t.location + ' - ' + _t.name
-                    _color = white
-                    if _t.completion:
-                        _color = green
-                    _chkbx = Checkbox()
-                    _chkbx.desc = _strtsk
-                    _chkbx.checked = (_t.completion == 1)
-                    _chkbx.x = _x - 30
-                    _chkbx.y = _y + 12
+                    _chk = _t.completion == 1
+                    _chkbx = Checkbox(True, _strtsk, _x - 30, _y + 12)
+##                    _chkbx.desc = _strtsk
+##                    _chkbx.checked = _t.completion
+##                    _chkbx.x = _x - 30
+##                    _chkbx.y = _y + 12
                     _y = _y + _yofs
                     self.addWidget(_chkbx)
 
@@ -220,7 +140,7 @@ class App:
             self.display_surf.blit(self.font_med.render('Select Player', False, white), (60,30))
             self.display_surf.blit(self.font_lg.render('Crewmate IRL Task Simulator', False, white), (320,220))
             for _pb in self.plyrbtns:
-                _pb.draw(self.display_surf, self.players[_pb.lbl].chosen)
+                _pb.draw(self.display_surf, self.players[_pb.name].chosen)
             self.btn_plyrsel.draw(self.display_surf)
             self.btn_tasks.draw(self.display_surf)
 
@@ -242,7 +162,7 @@ class App:
             self.display_surf.blit(tbar, (60, 60))
             pygame.draw.rect(self.display_surf, green, tbar_fill)
             self.display_surf.blit(tbar, (60, 60))
-            self.display_surf.blit(self.font_med.render('Your Tasks:' , False, white), (60,160))
+            self.display_surf.blit(self.font_med.render(self.player.name + '\'s Tasks:' , False, white), (60,160))
             for _t in self.tskbtns:
                 _t.draw(self.display_surf)
         self.sprites.draw(self.display_surf)
@@ -267,12 +187,12 @@ class App:
                     if self.menu == 'WELCOME':
                         # CHOOSE PLAYER
                         _plyrclkd = False
-                        for pn, po in self.players.items():
-                            if po.btn_choose.get_rect().collidepoint(mspos):
-                                print('Chose ' + pn)
-                                self.player = po
+                        for _pb in self.plyrbtns:
+                            if _pb.get_rect().collidepoint(mspos):
+                                print('Chose ' + _pb.name)
+                                self.player = self.players[_pb.name]
                                 _plyrclkd = True
-                                po.chosen = True
+                                #self.players[_pb.name].chosen = True
                         if(_plyrclkd):
                             _plyrclkd = False
                             for pn, po in self.players.items():
@@ -298,15 +218,24 @@ class App:
                             self.running = False
                             
                     elif self.menu == 'TASKS':
+                        # TASK CHECKBOXES
                         idx = 0
                         for tb in self.tskbtns:
                             _tbrect = pygame.Rect(tb.x, tb.y, tb.w, tb.h)
                             if _tbrect.collidepoint(mspos):
+                                _ptask = None
+                                _plyrs = self.tree.getroot().findall('Player')
+                                for _plyr in _plyrs:
+                                    if _plyr.get('name') == self.player.name:
+                                        _ptasks = _plyr.find('Tasks').findall('Task')
+                                        _ptask = _ptasks[idx]
                                 if self.player.tasks[idx].completion > 0:
                                     self.player.tasks[idx].completion = 0
+                                    _ptask.set('completion', '0')
                                     print('Task incomplete')
                                 elif self.player.tasks[idx].completion == 0:
                                     self.player.tasks[idx].completion = 1
+                                    _ptask.set('completion', '1')
                                     print('Task complete')
                                 self.lastMenu = 'NONE'
                             idx += 1
@@ -319,16 +248,16 @@ class App:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RIGHT:
                         self.player.moveRight()
-                        print('right')
+                        #print('right')
                     if event.key == pygame.K_LEFT:
                         self.player.moveLeft()
-                        print('left')
+                        #print('left')
                     if event.key == pygame.K_UP:
                         self.player.moveUp()
-                        print('up')
+                        #print('up')
                     if event.key == pygame.K_DOWN:
                         self.player.moveDown()
-                        print('down')
+                        #print('down')
                     if event.key == pygame.K_SPACE:
                         self.player.stop()
                     if event.key == pygame.K_ESCAPE:
@@ -353,14 +282,12 @@ class App:
 ##            if (keys[K_ESCAPE]):
 ##                self.running = False
                 
-
-
-
             self.on_loop()
             self.on_render()
 
             self.clock.tick(30)
             #time.sleep (50.0 / 1000.0);
+        self.tree.write('players.xml')
         self.on_cleanup()
         
     def addWidget(self, widget):
