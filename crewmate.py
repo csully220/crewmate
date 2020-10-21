@@ -68,7 +68,8 @@ class App:
         self.display_surf = None
         self.image_surf = None
         self.players = {}
-
+        self.block_list = pygame.sprite.Group()
+        self.all_sprites_list = pygame.sprite.Group()
 
         #read in the player information
         tree = ET.parse('.\data\players.xml')
@@ -136,18 +137,18 @@ class App:
                 yofs = 0
                 i = 0
                 for pn, po in self.players.items():
-                    #if pn != 'Common':
-                    _btn = po.btn_choose
-                    if i == 4:
-                        pby = 100
-                        pbx = 150
-                        yofs = 0
-                    _btn.x = pbx
-                    _btn.y = pby + yofs
-                    yofs = yofs + 94
-                    #_btn.draw(self.display_surf, po.chosen)
-                    i += 1;
-                    self.addWidget(_btn)
+                    if pn != 'Common':
+                        _btn = po.btn_choose
+                        if i == 4:
+                            pby = 100
+                            pbx = 150
+                            yofs = 0
+                        _btn.x = pbx
+                        _btn.y = pby + yofs
+                        yofs = yofs + 94
+                        #_btn.draw(self.display_surf, po.chosen)
+                        i += 1;
+                        self.addWidget(_btn)
 
                 self.addWidget(self.btn_plyrsel)
                 self.addWidget(self.btn_tasks)
@@ -173,7 +174,6 @@ class App:
                     _chkbx.y = _y + 12
                     _y = _y + _yofs
                     self.addWidget(_chkbx)
-                    
  
     def on_render(self):
         self.display_surf.blit(self.bg, (0, 0))
@@ -240,6 +240,9 @@ class App:
                                 po.chosen = False
                                 if po.name == self.player.name:
                                     po.chosen = True
+                            self.menu = 'TASKS'
+                            self.bg = pygame.image.load(r'.\data\images\bg_sparse.png')
+
                         # SELECT
                         if self.btn_plyrsel.rect.collidepoint(mspos):
                             print('Click!')
