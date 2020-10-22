@@ -1,39 +1,38 @@
-<?xml version="1.0"?>
 <Players>
     <Player name="Sully" color="blue">
         <Tasks>
-            <Task name="Do dishes" location="Kitchen" completion="0"/>
-            <Task name="Do pullups" location="Kitchen" completion="0"/>
+            <Task name="Do dishes" location="Kitchen" completion="1" />
+            <Task name="Do pullups" location="Kitchen" completion="1" />
         </Tasks>
     </Player>
     <Player name="Baby" color="pink">
         <Tasks>
-            <Task name="Vacuum" location="Everywhere" completion="0"/>
-            <Task name="Make sandwiches" location="Kitchen" completion="0"/>
-            <Task name="Get a massage" location="Kitchen" completion="0"/>
-            <Task name="Take a nap" location="Kitchen" completion="0"/>
+            <Task name="Vacuum" location="Everywhere" completion="0" />
+            <Task name="Make sandwiches" location="Kitchen" completion="0" />
+            <Task name="Get a massage" location="Kitchen" completion="0" />
+            <Task name="Take a nap" location="Kitchen" completion="0" />
         </Tasks>
     </Player>
     <Player name="Nahla" color="cyan">
         <Tasks>
-            <Task name="Find imposter" location="Everywhere" completion="0"/>
-            <Task name="Make the bed" location="Bedroom" completion="0"/>
-            <Task name="Take out trash" location="Everywhere" completion="0"/>
-            <Task name="Shampoo carpets" location="Bedroom" completion="0"/>
-            <Task name="Clean toilet" location="Everywhere" completion="0"/>
-            <Task name="Fold laundry" location="Bedroom" completion="0"/>
+            <Task name="Find imposter" location="Everywhere" completion="0" />
+            <Task name="Make the bed" location="Bedroom" completion="0" />
+            <Task name="Take out trash" location="Everywhere" completion="0" />
+            <Task name="Shampoo carpets" location="Bedroom" completion="0" />
+            <Task name="Clean toilet" location="Everywhere" completion="0" />
+            <Task name="Fold laundry" location="Bedroom" completion="0" />
         </Tasks>
     </Player>
     <Player name="Lilah" color="purple">
         <Tasks>
-            <Task name="Feed birds" location="Living room" completion="0"/>
-            <Task name="Put away shoes" location="Everywhere" completion="0"/>
+            <Task name="Feed birds" location="Living room" completion="1" />
+            <Task name="Put away shoes" location="Everywhere" completion="1" />
         </Tasks>
     </Player>
     <Player name="Common" color="white">
         <Tasks>
-            <Task name="Feed Monty" location="Living room" completion="0"/>
-            <Task name="Sweep" location="Living room" completion="1"/>
+            <Task name="Feed Monty" location="Living room" completion="1" />
+            <Task name="Sweep" location="Living room" completion="1" />
         </Tasks>
     </Player>
 </Players>

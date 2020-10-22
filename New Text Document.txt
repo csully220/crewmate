@@ -1,0 +1,9 @@
+import os
+os.chdir(r'C:\Users\colin\Documents\Code Projects\crewmate')
+
+import pygame
+from pygame.locals import *
+import time
+import xml.etree.ElementTree as ET
+from auwidgets import *
+from auplayer import *

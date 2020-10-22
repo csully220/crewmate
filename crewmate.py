@@ -56,10 +56,11 @@ class App:
                 _tn = _t.get('name')
                 _tl = _t.get('location')
                 _tc = int(_t.get('completion'))
-                print('completion ' + str(_tc))
                 tasks.append(Task(_tn, _tl, _tc, _pn))
+                
             new_plyr.tasks = tasks
             self.players[new_plyr.name] = new_plyr
+            
         self.player = self.players['Common']
         
         self.menu = 'WELCOME'
@@ -288,7 +289,7 @@ class App:
 
             self.clock.tick(30)
             #time.sleep (50.0 / 1000.0);
-        self.tree.write('players.xml')
+        self.tree.write('.\data\players.xml')
         self.on_cleanup()
         
     def addWidget(self, widget):
