@@ -11,4 +11,4 @@ Open the data folder and edit the players.xml file.
     frequency - daily, weekly, monthly
     completion - 0
     
-The "Common" player has unassigned tasks that anyone can do. These are viewed by clicking the Common button on the main screen
+The "Common" player has unassigned tasks that anyone can do. These are viewed by clicking the Common button on the main screen.
