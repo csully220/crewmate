@@ -2,8 +2,8 @@ import pygame
 from pygame.locals import *
 import time
 import xml.etree.ElementTree as ET
-from auwidgets import *
-from auplayer import *
+from lib.auwidgets import *
+from lib.auplayer import *
 
 import time
 
