@@ -1,15 +1,16 @@
 <Players>
     <Player name="Sully" color="blue">
         <Tasks>
-            <Task name="Do dishes" location="Kitchen" completion="1" />
-            <Task name="Do pullups" location="Kitchen" completion="1" />
+            <Task name="Do dishes" location="Kitchen" frequency="daily" completion="1" />
+            <Task name="Do pullups" location="Kitchen" frequency="weekly" completion="1" />
+            <Task name="Clean bird cage" location="Living room" frequency="weekly" completion="1" />
         </Tasks>
     </Player>
     <Player name="Baby" color="pink">
         <Tasks>
             <Task name="Vacuum" location="Everywhere" completion="0" />
             <Task name="Make sandwiches" location="Kitchen" completion="0" />
-            <Task name="Get a massage" location="Kitchen" completion="0" />
+            <Task name="Get a massage" location="Kitchen" completion="1" />
             <Task name="Take a nap" location="Kitchen" completion="0" />
         </Tasks>
     </Player>

@@ -2,10 +2,11 @@ import pygame
 from pygame.locals import *
 
 class Task:
-    def __init__(self, _name, _location, _completion, _owner):
+    def __init__(self, _name, _location, _completion, _owner, _frequency):
         self.name = _name
         self.owner = _owner
         self.location = _location
+        self.frequency = _frequency
         self.completion = _completion
 
 class Player(pygame.sprite.Sprite):
@@ -20,62 +21,56 @@ class Player(pygame.sprite.Sprite):
         self.tasks = _tasks
         _plyrimgstr = './data/images/players/' + _color + '_small.png'
         #_plyrimgstr = './data/red_plyr.png'
-        self.leftimg = pygame.image.load(_plyrimgstr).convert()
-        self.rightimg = pygame.transform.flip(self.leftimg, True, False)
+        self.rightimg = pygame.image.load(_plyrimgstr).convert()
+        self.leftimg = pygame.transform.flip(self.rightimg, True, False)
         self.img = self.rightimg
         self.image = self.rightimg
-        self.x = 100
-        self.y = 100
+        self.x = 30
+        self.y = 80
         self.dx = 0
         self.dy = 0
         self.rect = self.image.get_rect()
-        self.rect.x = 600
-        self.rect.y = 150
+        self.rect.x = self.x
+        self.rect.y = self.y
         #self.btn_choose = PlayerButton(self.color,self.name)
 
     def moveRight(self):
-        if self.dx < 5:
-            self.dx = self.dx + 1
-        self.direction = 'LEFT'
+        if self.dx < 8:
+            self.dx = self.dx + 2
+        self.image = self.rightimg
  
     def moveLeft(self):
-        if self.dx > -5:
-            self.dx = self.dx - 1
-        #self.x = self.x - self.step
-        self.direction = 'RIGHT'
+        if self.dx > -8:
+            self.dx = self.dx - 2
+        self.image = self.leftimg
  
     def moveUp(self):
-        #if self.dy > -5:
-            self.dy = self.dy - 1
-        #self.y = self.y - self.step
+        if self.dy > -8:
+            self.dy = self.dy - 2
  
     def moveDown(self):
-        #if self.dy < 5:
-            self.dy = self.dy + 1
-        #self.y = self.y + self.step
+        if self.dy < 8:
+            self.dy = self.dy + 2
 
     def stop(self):
         self.dx = 0
         self.dy = 0
  
     def update(self):
+        if self.dx < 0:
+            self.dx += 1
+        if self.dx > 0:
+            self.dx -= 1
+        if self.dy < 0:
+            self.dy += 1
+        if self.dy > 0:
+            self.dy -= 1
+    
         if self.rect.x > 0 and self.rect.x < 1200:
             self.rect.x += self.dx
+        else:
+            self.rect.x = 30
         if self.rect.y > 0 and self.rect.y < 600:
             self.rect.y += self.dy
-        #k = 1
-        #if self.dx < 0:
-        #    self.dx += k
-        #if self.dx > 0:
-        #    self.dx -= k
-        #if self.dy < 0:
-        #   self.dy += k
-        #if self.dy > 0:
-        #    self.dy -= k
-
-
-    #def draw(self, surface):
-    #    if self.direction == 'LEFT':
-    #        surface.blit(self.leftimg,(self.x,self.y))
-    #   elif self.direction == 'RIGHT':
-    #       surface.blit(self.rightimg,(self.x,self.y)) 
+        else:
+            self.rect.y = 80

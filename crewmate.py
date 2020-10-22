@@ -5,6 +5,8 @@ import xml.etree.ElementTree as ET
 from auwidgets import *
 from auplayer import *
 
+import time
+
 class App:
 
     windowWidth = 1200
@@ -35,8 +37,6 @@ class App:
 
         #format the menus
 
-
-
     def on_init(self):
         pygame.init()
         pygame.font.init()
@@ -46,6 +46,7 @@ class App:
         #read in the player information
         self.tree = ET.parse('.\data\players.xml')
         _players = self.tree.getroot().findall('Player')
+        firstplayer = True
         for _p in _players:
             _pn = _p.get('name')
             _pc = _p.get('color')
@@ -55,22 +56,23 @@ class App:
             for _t in _xmltasks:
                 _tn = _t.get('name')
                 _tl = _t.get('location')
+                _tf = _t.get('frequency')
                 _tc = int(_t.get('completion'))
-                tasks.append(Task(_tn, _tl, _tc, _pn))
+                tasks.append(Task(_tn, _tl, _tc, _pn, _tf))
                 
             new_plyr.tasks = tasks
             self.players[new_plyr.name] = new_plyr
-            
-        self.player = self.players['Common']
-        
+            if firstplayer:
+                self.player = self.players[new_plyr.name]
+                self.player.chosen = True
+                firstplayer = False
+                
         self.menu = 'WELCOME'
         self.lastMenu = 'NONE'
         self.font_sm = pygame.font.SysFont('Comic Sans MS', 26)
         self.font_med = pygame.font.SysFont('Comic Sans MS', 32)
         self.font_lg = pygame.font.SysFont('Comic Sans MS', 40)
         
-
-        #print(self.player.name)
         self.sprites.add(self.player)
         
         self.running = True
@@ -81,6 +83,9 @@ class App:
  
     def on_loop(self):
         self.sprites.update()
+        t = time.localtime()
+        self.current_date = time.strftime("%D", t)
+        self.current_time = time.strftime("%H:%M:%S", t)
         if self.menu != self.lastMenu:
             self.lastMenu = self.menu
             self.plyrbtns.clear()
@@ -100,8 +105,6 @@ class App:
                         _btn.y = pby
                         pbx += xofs
                         _btn.x = pbx
-                        #xofs = xofs + 94
-                        #_btn.draw(self.display_surf, po.chosen) 
                         i += 1;
                         self.addWidget(_btn)
                         
@@ -121,10 +124,6 @@ class App:
                     _strtsk = _t.location + ' - ' + _t.name
                     _chk = _t.completion == 1
                     _chkbx = Checkbox(_chk, _strtsk, _x - 30, _y + 12)
-##                    _chkbx.desc = _strtsk
-##                    _chkbx.checked = _t.completion
-##                    _chkbx.x = _x - 30
-##                    _chkbx.y = _y + 12
                     _y = _y + _yofs
                     self.addWidget(_chkbx)
 
@@ -133,14 +132,13 @@ class App:
         # Render Welcome Screen
         if self.menu == 'WELCOME':
             self.display_surf.blit(self.bg, (0, 0))
-            self.display_surf.blit(self.font_med.render('Select Player', False, white), (60,30))
+            self.display_surf.blit(self.font_med.render(self.current_date, False, white), (60,30))
+            self.display_surf.blit(self.font_med.render(self.current_time, False, white), (940,30))
             self.display_surf.blit(self.font_lg.render('Crewmate IRL Task Simulator', False, white), (320,160))
             for _pb in self.plyrbtns:
                 _pb.draw(self.display_surf, self.players[_pb.name].chosen)
             for _b in self.buttons:
                 _b.draw(self.display_surf)
-            #self.btn_common.draw(self.display_surf)
-            #self.btn_tasks.draw(self.display_surf)
 
         # Render Task List Screen
         elif self.menu == 'TASKS':
@@ -167,7 +165,7 @@ class App:
             self.display_surf.blit(self.font_med.render(_lbl , False, white), (60,160))
             for _t in self.tskbtns:
                 _t.draw(self.display_surf)
-        self.sprites.draw(self.display_surf)
+        #self.sprites.draw(self.display_surf)
         pygame.display.flip()
 
 
@@ -192,9 +190,10 @@ class App:
                         for _pb in self.plyrbtns:
                             if _pb.get_rect().collidepoint(mspos):
                                 print('Chose ' + _pb.name)
+                                self.sprites.remove(self.player)
                                 self.player = self.players[_pb.name]
+                                self.sprites.add(self.player)
                                 _plyrclkd = True
-                                #self.players[_pb.name].chosen = True
                         if(_plyrclkd):
                             _plyrclkd = False
                             for pn, po in self.players.items():
@@ -248,47 +247,47 @@ class App:
                             self.bg = pygame.image.load(r'.\data\images\bg_welcome.png')
                     print(mspos)
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RIGHT:
-                        self.player.moveRight()
-                        #print('right')
-                    if event.key == pygame.K_LEFT:
-                        self.player.moveLeft()
-                        #print('left')
-                    if event.key == pygame.K_UP:
-                        self.player.moveUp()
-                        #print('up')
-                    if event.key == pygame.K_DOWN:
-                        self.player.moveDown()
-                        #print('down')
+##                    if event.key == pygame.K_RIGHT:
+##                        self.player.moveRight()
+##                        #print('right')
+##                    if event.key == pygame.K_LEFT:
+##                        self.player.moveLeft()
+##                        #print('left')
+##                    if event.key == pygame.K_UP:
+##                        self.player.moveUp()
+##                        #print('up')
+##                    if event.key == pygame.K_DOWN:
+##                        self.player.moveDown()
+##                        #print('down')
                     if event.key == pygame.K_SPACE:
                         self.player.stop()
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
                         
 
-##            keys = pygame.key.get_pressed() 
-## 
-##            if (keys[K_RIGHT]):
-##                self.player.moveRight()
-## 
-##            if (keys[K_LEFT]):
-##                self.player.moveLeft()
-## 
-##            if (keys[K_UP]):
-##                self.player.moveUp()
-## 
-##            if (keys[K_DOWN]):
-##                self.player.moveDown()
-##            if (keys[K_SPACE]):
-##                self.player.stop()
-##            if (keys[K_ESCAPE]):
-##                self.running = False
+            keys = pygame.key.get_pressed() 
+ 
+            if (keys[K_RIGHT]):
+                self.player.moveRight()
+ 
+            if (keys[K_LEFT]):
+                self.player.moveLeft()
+ 
+            if (keys[K_UP]):
+                self.player.moveUp()
+ 
+            if (keys[K_DOWN]):
+                self.player.moveDown()
+            if (keys[K_SPACE]):
+                self.player.stop()
+            if (keys[K_ESCAPE]):
+                self.running = False
                 
             self.on_loop()
             self.on_render()
 
             self.clock.tick(30)
-            #time.sleep (50.0 / 1000.0);
+
         self.tree.write('.\data\players.xml')
         self.on_cleanup()
         
