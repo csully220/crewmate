@@ -31,7 +31,7 @@
     </Player>
     <Player name="Common" color="white">
         <Tasks>
-            <Task name="Feed Monty" location="Living room" completion="0" />
+            <Task name="Feed Monty" location="Living room" completion="1" />
             <Task name="Sweep" location="Living room" completion="1" />
         </Tasks>
     </Player>

@@ -33,23 +33,20 @@ class Checkbox():
         if self.checked:
             self.img = pygame.image.load(r'./data/images/buttons/check.png')
             _desc = _font.render(self.desc, False, green)
-            
+
         else:
             self.img = pygame.image.load(r'./data/images/buttons/nocheck.png')
             _desc = _font.render(self.desc, False, white)
-            
+
         surface.blit(self.img,(self.x,self.y))
         surface.blit(_desc,(self.x + 30,self.y - 12))
 
 class Button():
-    def __init__(self, _action, _x, _y):
+    def __init__(self, _action, _label, _x, _y):
         self.img = pygame.image.load(r'./data/images/buttons/blank.png')
         self.action = _action
-        if(self.action == 'select'):
-            self.label = 'Select'
-        elif(self.action == 'tasks'):
-            self.label = 'Tasks'
-             
+        self.label = _label
+
         self.x = _x
         self.y = _y
         self.w = 192
@@ -83,7 +80,6 @@ class PlayerButton():
         if(chosen):
             _color = green
         _lbl = _font.render(self.name, False, _color)
-        
+
         surface.blit(_lbl, (self.x,self.y))
         surface.blit(self.img,(self.x,self.y + 36))
-

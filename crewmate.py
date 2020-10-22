@@ -14,7 +14,6 @@ class App:
     plyrbtns = []
     tskbtns = []
     buttons = []
-    
  
     def __init__(self):
         self.clock = pygame.time.Clock()
@@ -35,8 +34,7 @@ class App:
         #        print(t.completion)
 
         #format the menus
-        self.btn_plyrsel = Button('select', 400, 356)
-        self.btn_tasks = Button('tasks', 606, 356)
+
 
 
     def on_init(self):
@@ -89,42 +87,39 @@ class App:
             self.tskbtns.clear()
             
             if self.menu == 'WELCOME':
-
                 #self.player.draw(self.display_surf)
-                pbx = 60
-                pby = 100
-                yofs = 0
+                center = len(self.players)/2
+                xofs = 100
+                pbx = 600 - (center * (xofs-1)) - (xofs/2)
+                pby = 236
                 i = 0
                 for pn, po in self.players.items():
                     if pn != 'Common':
                         _btn = PlayerButton(po.color, po.name)
-                        if i == 4:
-                            pby = 100
-                            pbx = 150
-                            yofs = 0
+                        _btn.y = pby
+                        pbx += xofs
                         _btn.x = pbx
-                        _btn.y = pby + yofs
-                        yofs = yofs + 94
-                        #_btn.draw(self.display_surf, po.chosen)
+                        #xofs = xofs + 94
+                        #_btn.draw(self.display_surf, po.chosen) 
                         i += 1;
                         self.addWidget(_btn)
-
-                self.addWidget(self.btn_plyrsel)
-                self.addWidget(self.btn_tasks)
+                        
+                btn_common = Button('common', 'Common', 400, 356)
+                btn_progress = Button('tasks', 'Progress', 606, 356)
+                
+                self.addWidget(btn_common)
+                self.addWidget(btn_progress)
 
             elif self.menu == 'TASKS':
-                _x = 60
-                _y = 160
+                _x = 90
+                _y = 200
                 _yofs = 40
                 # Player tasks
-                
-                _y += 40
-                _x += 30
                 for _t in self.player.tasks:
                     #print(t)
                     _strtsk = _t.location + ' - ' + _t.name
                     _chk = _t.completion == 1
-                    _chkbx = Checkbox(True, _strtsk, _x - 30, _y + 12)
+                    _chkbx = Checkbox(_chk, _strtsk, _x - 30, _y + 12)
 ##                    _chkbx.desc = _strtsk
 ##                    _chkbx.checked = _t.completion
 ##                    _chkbx.x = _x - 30
@@ -138,11 +133,13 @@ class App:
         if self.menu == 'WELCOME':
             self.display_surf.blit(self.bg, (0, 0))
             self.display_surf.blit(self.font_med.render('Select Player', False, white), (60,30))
-            self.display_surf.blit(self.font_lg.render('Crewmate IRL Task Simulator', False, white), (320,220))
+            self.display_surf.blit(self.font_lg.render('Crewmate IRL Task Simulator', False, white), (320,160))
             for _pb in self.plyrbtns:
                 _pb.draw(self.display_surf, self.players[_pb.name].chosen)
-            self.btn_plyrsel.draw(self.display_surf)
-            self.btn_tasks.draw(self.display_surf)
+            for _b in self.buttons:
+                _b.draw(self.display_surf)
+            #self.btn_common.draw(self.display_surf)
+            #self.btn_tasks.draw(self.display_surf)
 
         # Render Task List Screen
         elif self.menu == 'TASKS':
@@ -162,7 +159,11 @@ class App:
             self.display_surf.blit(tbar, (60, 60))
             pygame.draw.rect(self.display_surf, green, tbar_fill)
             self.display_surf.blit(tbar, (60, 60))
-            self.display_surf.blit(self.font_med.render(self.player.name + '\'s Tasks:' , False, white), (60,160))
+            if self.player.name != 'Common':
+                _lbl = self.player.name + '\'s Tasks:'
+            else:
+                _lbl = self.player.name + ' Tasks:'
+            self.display_surf.blit(self.font_med.render(_lbl , False, white), (60,160))
             for _t in self.tskbtns:
                 _t.draw(self.display_surf)
         self.sprites.draw(self.display_surf)
@@ -185,7 +186,7 @@ class App:
                 if event.type == pygame.MOUSEBUTTONUP:
                     mspos = pygame.mouse.get_pos()
                     if self.menu == 'WELCOME':
-                        # CHOOSE PLAYER
+                        # PLAYER SELECT BUTTONS
                         _plyrclkd = False
                         for _pb in self.plyrbtns:
                             if _pb.get_rect().collidepoint(mspos):
@@ -202,15 +203,15 @@ class App:
                             self.menu = 'TASKS'
                             self.bg = pygame.image.load(r'.\data\images\bg_sparse.png')
 
-                        # SELECT
-                        if self.btn_plyrsel.rect.collidepoint(mspos):
-                            print('Click!')
-                            self.menu = 'TASKS'
-                            self.bg = pygame.image.load(r'.\data\images\bg_sparse.png')
-                        # TASKS
-                        if self.btn_tasks.rect.collidepoint(mspos):
-                            self.menu = 'TASKS'
-                            self.bg = pygame.image.load(r'.\data\images\bg_sparse.png')
+                        # OTHER BUTTONS
+                        for _b in self.buttons:
+                            if _b.rect.collidepoint(mspos):
+                                print(_b.action)
+                                if _b.action == 'common':
+                                    self.player = self.players['Common']
+                                    self.menu = 'TASKS'
+                                    self.bg = pygame.image.load(r'.\data\images\bg_sparse.png')
+
                         # EXIT
                         exit_rect = pygame.Rect(76, 540, 100, 50)
                         if exit_rect.collidepoint(mspos):
