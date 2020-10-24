@@ -1,11 +1,10 @@
 import pygame
 from pygame.locals import *
 import time
-import xml.etree.ElementTree as ET
-from lib.auwidgets import *
-from lib.auplayer import *
 
-import time
+from lib.widgets import *
+from lib.player import *
+from lib.database import *
 
 class App:
 
@@ -22,8 +21,8 @@ class App:
         self.running = True
         self.display_surf = None
         self.image_surf = None
-        self.players = {}
-        self.sprites = pygame.sprite.Group()
+        self.db = XmlDatabase('.\data\players.xml')
+
         
         #for p in self.players:
         #    print("Players:")
@@ -33,7 +32,7 @@ class App:
         #    for t in p.tasks:
         #        print(t.name)
         #        print(t.location)
-        #        print(t.completion)
+        #        print(t.complete)
 
         #format the menus
 
@@ -42,50 +41,36 @@ class App:
         pygame.font.init()
         self.display_surf = pygame.display.set_mode((self.windowWidth,self.windowHeight), pygame.RESIZABLE)
         pygame.display.set_caption('Crewmate IRL Task Simulator')
-        
+
         #read in the player information
-        self.tree = ET.parse('.\data\players.xml')
-        _players = self.tree.getroot().findall('Player')
-        firstplayer = True
-        for _p in _players:
-            _pn = _p.get('name')
-            _pc = _p.get('color')
-            new_plyr = Player(_pn, _pc)
-            _xmltasks = _p.find('Tasks').findall('Task')
-            tasks = []
-            for _t in _xmltasks:
-                _tn = _t.get('name')
-                _tl = _t.get('location')
-                _tf = _t.get('frequency')
-                _tc = int(_t.get('completion'))
-                tasks.append(Task(_tn, _tl, _tc, _pn, _tf))
-                
-            new_plyr.tasks = tasks
-            self.players[new_plyr.name] = new_plyr
-            if firstplayer:
-                self.player = self.players[new_plyr.name]
-                self.player.chosen = True
-                firstplayer = False
-                
+        _plyrs = self.db.getAllPlayers()
+        self.players = {}
+        for _p in _plyrs:
+            self.players[_p.name] = _p
+            self.sprites = pygame.sprite.Group()
+
+        self.player = self.players['Common']
+        self.player.chosen = True
+
         self.menu = 'WELCOME'
         self.lastMenu = 'NONE'
         self.font_sm = pygame.font.SysFont('Comic Sans MS', 26)
         self.font_med = pygame.font.SysFont('Comic Sans MS', 32)
         self.font_lg = pygame.font.SysFont('Comic Sans MS', 40)
-        
+
         self.sprites.add(self.player)
-        
+
         self.running = True
- 
+
     def on_event(self, event):
         if event.type == QUIT:
             self.running = False
- 
+
     def on_loop(self):
         self.sprites.update()
-        t = time.localtime()
-        self.current_date = time.strftime("%D", t)
-        self.current_time = time.strftime("%H:%M:%S", t)
+        self.nowtime = time.localtime()
+        self.current_date = time.strftime("%D", self.nowtime)
+        self.current_time = time.strftime("%H:%M:%S", self.nowtime)
         if self.menu != self.lastMenu:
             self.lastMenu = self.menu
             self.plyrbtns.clear()
@@ -114,18 +99,22 @@ class App:
                 self.addWidget(btn_common)
                 self.addWidget(btn_progress)
 
-            elif self.menu == 'TASKS':
-                _x = 90
-                _y = 200
-                _yofs = 40
-                # Player tasks
-                for _t in self.player.tasks:
-                    #print(t)
-                    _strtsk = _t.location + ' - ' + _t.name
-                    _chk = _t.completion == 1
-                    _chkbx = Checkbox(_chk, _strtsk, _x - 30, _y + 12)
-                    _y = _y + _yofs
-                    self.addWidget(_chkbx)
+        if self.menu == 'TASKS':
+            _x = 90
+            _y = 200
+            _yofs = 40
+            # Player tasks
+            for _t in self.player.tasks:
+                #print(t)
+                _dl = time.strftime("%D - %H:%M", _t.deadline)
+                #tr = time.strftime("%H:%M:%S", _t.deadline) - time.strftime("%H:%M:%S", self.nowtime)
+                if self.nowtime >= _t.deadline:
+                    print('Deadline has passed')
+                _strtsk = _t.location + ' - ' + _t.name + '   Deadline: ' + _dl
+                _chk = _t.complete == 1
+                _chkbx = Checkbox(_chk, _strtsk, _x - 30, _y + 12)
+                _y = _y + _yofs
+                self.addWidget(_chkbx)
 
     def on_render(self):
         self.display_surf.blit(self.bg, (0, 0))
@@ -147,7 +136,7 @@ class App:
             tot_tsks = len(self.player.tasks)
             comp_tsks = 0
             for t in self.player.tasks:
-                if t.completion == 1:
+                if t.complete == 1:
                     comp_tsks += 1
             ratio = comp_tsks/tot_tsks
             fill_w = 845
@@ -224,23 +213,18 @@ class App:
                         for tb in self.tskbtns:
                             _tbrect = pygame.Rect(tb.x, tb.y, tb.w, tb.h)
                             if _tbrect.collidepoint(mspos):
-                                _ptask = None
-                                _plyrs = self.tree.getroot().findall('Player')
-                                for _plyr in _plyrs:
-                                    if _plyr.get('name') == self.player.name:
-                                        _ptasks = _plyr.find('Tasks').findall('Task')
-                                        _ptask = _ptasks[idx]
-                                if self.player.tasks[idx].completion > 0:
-                                    self.player.tasks[idx].completion = 0
-                                    _ptask.set('completion', '0')
+                                print(idx)
+                                if self.player.tasks[idx].complete > 0:
+                                    self.player.tasks[idx].complete = 0
                                     print('Task incomplete')
-                                elif self.player.tasks[idx].completion == 0:
-                                    self.player.tasks[idx].completion = 1
-                                    _ptask.set('completion', '1')
+                                elif self.player.tasks[idx].complete == 0:
+                                    self.player.tasks[idx].complete = 1
                                     print('Task complete')
+                                self.db.updateTaskElement(self.player.tasks[idx])
                                 self.lastMenu = 'NONE'
+                                break;
                             idx += 1
-                        # EXIT
+                         # EXIT
                         exit_rect = pygame.Rect(76, 540, 100, 50)
                         if exit_rect.collidepoint(mspos):
                             self.menu = 'WELCOME'
@@ -288,7 +272,7 @@ class App:
 
             self.clock.tick(30)
 
-        self.tree.write('.\data\players.xml')
+        self.db.saveAll()
         self.on_cleanup()
         
     def addWidget(self, widget):

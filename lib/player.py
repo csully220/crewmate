@@ -1,13 +1,27 @@
 import pygame
 from pygame.locals import *
+import time
 
 class Task:
-    def __init__(self, _name, _location, _completion, _owner, _frequency):
+    def __init__(self, _name, _location, _complete, _owner, _frequency):
         self.name = _name
         self.owner = _owner
         self.location = _location
         self.frequency = _frequency
-        self.completion = _completion
+        self.complete = _complete
+        t = time.localtime()
+        self.dt_created = t
+        #dl = (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, t.tm_wday, t.tm_yday, t.tm_idst)
+        dl = (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, t.tm_wday, t.tm_yday, t.tm_isdst)
+        if _frequency == 'daily':
+            dl = (t.tm_year, t.tm_mon, t.tm_mday, 23, 59, 0, t.tm_wday, t.tm_yday, t.tm_isdst)
+        if _frequency == 'weekly':
+            dl = (t.tm_year, t.tm_mon, t.tm_mday, 23, 59, 0, 7, t.tm_yday, t.tm_isdst)
+        
+        self.deadline = time.struct_time(dl)
+        self.date = time.strftime("%D", t)
+        self.time = time.strftime("%H:%M:%S", t)
+
 
 class Player(pygame.sprite.Sprite):
     step = 10
