@@ -1,6 +1,8 @@
 import pygame
 from pygame.locals import *
 import time
+import configparser
+import requests
 
 from lib.widgets import *
 from lib.player import *
@@ -17,11 +19,19 @@ class App:
     buttons = []
  
     def __init__(self):
+        self.clock = pygame.time.Clock()    
         self.clock = pygame.time.Clock()
         self.running = True
         self.display_surf = None
         self.image_surf = None
-        self.db = XmlDatabase('.\data\players.xml')
+        config = configparser.ConfigParser()
+        config.read('.\data\crewmate.cfg')
+        if config['general']['database_type'] == 'local':
+            self.db = XmlDatabase('.\data\players.xml')
+        elif config['general']['database_type'] == 'network':
+            ip = config['network']['server_ip']
+            port = config['network']['server_port']
+            self.db = NetworkDatabase(ip, port)
 
         
         #for p in self.players:
@@ -108,9 +118,7 @@ class App:
                 #print(t)
                 _dl = time.strftime("%D - %H:%M", _t.deadline)
                 #tr = time.strftime("%H:%M:%S", _t.deadline) - time.strftime("%H:%M:%S", self.nowtime)
-                if self.nowtime >= _t.deadline:
-                    print('Deadline has passed')
-                _strtsk = _t.location + ' - ' + _t.name + '   Deadline: ' + _dl
+                _strtsk = _t.location + ' - ' + _t.name # + '   Deadline: ' + _dl
                 _chk = _t.complete == 1
                 _chkbx = Checkbox(_chk, _strtsk, _x - 30, _y + 12)
                 _y = _y + _yofs
@@ -138,7 +146,10 @@ class App:
             for t in self.player.tasks:
                 if t.complete == 1:
                     comp_tsks += 1
-            ratio = comp_tsks/tot_tsks
+            if tot_tsks:
+                ratio = comp_tsks/tot_tsks
+            else:
+                ratio = 0
             fill_w = 845
             scaled_w = round(fill_w * ratio)
             
@@ -272,7 +283,7 @@ class App:
 
             self.clock.tick(30)
 
-        self.db.saveAll()
+        #self.db.saveAll()
         self.on_cleanup()
         
     def addWidget(self, widget):
@@ -286,7 +297,6 @@ class App:
             #print('Player Button')
             self.plyrbtns.append(widget)   
 
- 
 if __name__ == "__main__" :
     theApp = App()
     theApp.on_execute()

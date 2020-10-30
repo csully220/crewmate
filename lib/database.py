@@ -1,5 +1,38 @@
 import xml.etree.ElementTree as ET
 from lib.player import *
+import requests
+
+class NetworkDatabase:
+    
+    def __init__(self, _ip='127.0.0.1', _port='8000'):
+        self.server_ip = _ip
+        self.server_port = _port
+        self.urlbase = 'http://' + self.server_ip + ':' + self.server_port + '/tasker/api/'
+
+    def getAllPlayers(self):
+        resp = requests.get(self.urlbase + 'players')
+        player_elements = resp.json()
+        players = []
+        for pe in player_elements:
+            pn = pe.get('name')
+            pc = pe.get('color')
+            new_player = Player(pn, pc)
+            pid = pe.get('id')
+            query = {'assignee':pid}
+            
+            resp = requests.get(self.urlbase + 'tasks', params=query)
+            tasks = []
+            task_elements = resp.json()
+            for t in task_elements:
+                tn = t.get('desc')
+                tl = t.get('location')
+                tf = t.get('freq')
+                tc = int(t.get('complete'))
+                tdl = t.get('deadline')
+                tasks.append(Task(tn, tl, tc, pn, tf))
+            new_player.tasks = tasks
+            players.append(new_player)
+        return players
 
 class XmlDatabase:
 
@@ -20,9 +53,9 @@ class XmlDatabase:
             task_elements = pe.find('Tasks').findall('Task')
             tasks = []
             for t in task_elements:
-                tn = t.get('name')
+                tn = t.get('desc')
                 tl = t.get('location')
-                tf = t.get('frequency')
+                tf = t.get('freq')
                 tc = int(t.get('complete'))
                 tasks.append(Task(tn, tl, tc, pn, tf))
             new_player.tasks = tasks
