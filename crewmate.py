@@ -6,18 +6,21 @@ import requests
 
 from lib.widgets import *
 from lib.player import *
+from lib.floater import *
 from lib.database import *
 
 class App:
 
     windowWidth = 1920
     windowHeight = 1080
-    bg = pygame.image.load(r'.\data\images\bg_welcome.png')
+    bg = pygame.image.load(r'.\data\images\bg_title.png')
     players = {}
     plyrbtns = []
     tskbtns = []
     buttons = []
- 
+    
+
+
     def __init__(self):
         self.clock = pygame.time.Clock()    
         self.clock = pygame.time.Clock()
@@ -59,7 +62,8 @@ class App:
         self.players = {}
         for _p in _plyrs:
             self.players[_p.name] = _p
-            self.sprites = pygame.sprite.Group()
+        self.floaters = pygame.sprite.Group()
+        self.sprites = pygame.sprite.Group()
 
         self.player = self.players['Common']
         self.player.chosen = True
@@ -69,6 +73,10 @@ class App:
         self.font_sm = pygame.font.SysFont('Comic Sans MS', 26)
         self.font_med = pygame.font.SysFont('Comic Sans MS', 32)
         self.font_lg = pygame.font.SysFont('Comic Sans MS', 40)
+
+        for i in range(1,18):
+            self.floaters.add(Floater(i))
+        self.floaters.add(Floater(0))
 
         self.sprites.add(self.player)
 
@@ -80,6 +88,8 @@ class App:
 
     def on_loop(self):
         self.sprites.update()
+        self.updateFloaters()
+        self.floaters.update()
         self.nowtime = time.localtime()
         self.current_date = time.strftime("%D", self.nowtime)
         self.current_time = time.strftime("%H:%M:%S", self.nowtime)
@@ -136,6 +146,7 @@ class App:
         # Render Welcome Screen
         if self.menu == 'WELCOME':
             self.display_surf.blit(self.bg, (0, 0))
+            self.floaters.draw(self.display_surf)
             self.display_surf.blit(self.font_med.render(self.current_date, False, white), (60,30))
             self.display_surf.blit(self.font_med.render(self.current_time, False, white), (260,30))
             self.display_surf.blit(self.font_lg.render('Crewmate IRL Task Simulator', False, white), (690,160))
@@ -310,6 +321,21 @@ class App:
         if type(widget) == PlayerButton:
             #print('Player Button')
             self.plyrbtns.append(widget)   
+
+    def updateFloaters(self):
+        ob = [] #out of bounds
+        removed = False
+        for f in self.floaters:
+            if f.rect.x < -100 or f.rect.x > 2020:
+                ob.append(f)
+                removed = True
+            if f.rect.y < -100 or f.rect.y > 1180:
+                ob.append(f)
+                removed = True
+        for f in ob:
+            self.floaters.remove(f)
+        if removed == True:
+            self.floaters.add(Floater(random.randrange(1,6)))
 
 if __name__ == "__main__" :
     theApp = App()
