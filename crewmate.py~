@@ -99,7 +99,7 @@ class App:
                 # offset by half to align centers
                 pbx = (self.windowWidth/2) - (totplyriconwidth/2) + (margin/2)
                 print(pbx)
-                pby = 360
+                pby = 230
                 i = 0
                 for pn, po in self.players.items():
                     if pn != 'Common':

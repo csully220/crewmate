@@ -45,19 +45,43 @@ class Button():
     def __init__(self, _action, _label, _x, _y):
         self.img = pygame.image.load(r'./data/images/buttons/blank.png')
         self.action = _action
+        self.active = False
         self.label = _label
-
         self.x = _x
         self.y = _y
-        self.w = 192
+        if _action == 'exit':
+            self.w = 160
+        else:
+            self.w = 192
         self.h = 80
         self.rect = pygame.Rect(_x, _y, self.w, self.h)
 
     def draw(self, surface):
         _font = pygame.font.SysFont('Comic Sans MS', 32)
-        _lbl = _font.render(self.label, False, white)
-        surface.blit(self.img,(self.x,self.y))
-        surface.blit(_lbl,(self.x + 40,self.y + 16))
+        if self.action == 'exit':
+            if self.active:
+                _color = green
+                _img = pygame.image.load(r'./data/images/buttons/exit_active.png')
+            else:
+                _color = white
+                _img = pygame.image.load(r'./data/images/buttons/exit.png')
+
+            _lbl = _font.render(self.label, False, _color)
+            surface.blit(_img,(self.x,self.y))
+            surface.blit(_lbl,(self.x + 50,self.y + 16))
+
+        else:
+            _color = white
+            _img = pygame.image.load(r'./data/images/buttons/blank.png')
+            if self.active:
+                _color = green
+                _img = pygame.image.load(r'./data/images/buttons/active.png')
+            _lbl = _font.render(self.label, False, _color)
+            surface.blit(_img,(self.x,self.y))
+            surface.blit(_lbl,(self.x + 40,self.y + 16))
+            
+    def get_rect(self):
+        return pygame.Rect(self.x, self.y, self.w, self.h)
 
 class PlayerButton():
     def __init__(self, _color, _name='', _x=0, _y=0):
@@ -73,7 +97,10 @@ class PlayerButton():
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.w, self.h)
 
-    def draw(self, surface, chosen=False):
+    def draw(self, surface, chosen=False, xoffset=0, yoffset=0, center=False):
+        if center:
+            xoffset += -1 * (self.w/2)
+            yoffset += -1 * (self.h/2)
         _font = pygame.font.SysFont('Comic Sans MS', 26)
         #_lbl = _font.render(self.lbl, False, (255, 255, 255))
         _color = white
@@ -81,5 +108,5 @@ class PlayerButton():
             _color = green
         _lbl = _font.render(self.name, False, _color)
 
-        surface.blit(_lbl, (self.x,self.y))
-        surface.blit(self.img,(self.x,self.y + 36))
+        surface.blit(_lbl, (self.x + xoffset,self.y + yoffset))
+        surface.blit(self.img,(self.x + xoffset,self.y + yoffset + 36))
