@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 from lib.player import *
 import requests
+import datetime
 
 class NetworkDatabase:
     
@@ -16,7 +17,8 @@ class NetworkDatabase:
         for pe in player_elements:
             pn = pe.get('name')
             pc = pe.get('color')
-            new_player = Player(pn, pc)
+            pid = pe.get('id')
+            new_player = Player(pid, pn, pc)
             pid = pe.get('id')
             query = {'assignee':pid}
             
@@ -24,15 +26,37 @@ class NetworkDatabase:
             tasks = []
             task_elements = resp.json()
             for t in task_elements:
+                tid = t.get('id')
                 tn = t.get('desc')
                 tl = t.get('location')
                 tf = t.get('freq')
+                tr = t.get('recurring')
                 tc = int(t.get('complete'))
+                tcr = t.get('created')
                 tdl = t.get('deadline')
-                tasks.append(Task(tn, tl, tc, pn, tf))
+                tpid = t.get('owner_id')
+                tasks.append(Task(tid, tn, tl, tc, pn, tf, tr, tcr, tdl, pid))
             new_player.tasks = tasks
             players.append(new_player)
         return players
+
+    def updateTaskElement(self, task):
+        resp = requests.put(self.urlbase + 'tasks/' + str(task.id) + '/', json=self.serialize(task))
+        print(resp.json())
+    
+    def serialize(self, el):
+        if type(el) == Task:
+            jstr = {}
+            jstr['id'] = el.id
+            jstr['desc'] = el.desc
+            jstr['location'] = el.location
+            jstr['recurring'] = el.recurring
+            jstr['freq'] = el.frequency
+            jstr['deadline'] = el.deadline
+            jstr['complete'] = el.complete
+            jstr['created'] = el.created
+            jstr['assignee'] = el.owner_id
+            return jstr
 
 class XmlDatabase:
 

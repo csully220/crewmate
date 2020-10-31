@@ -116,9 +116,9 @@ class App:
             # Player tasks
             for _t in self.player.tasks:
                 #print(t)
-                _dl = time.strftime("%D - %H:%M", _t.deadline)
+                _dl = _t.deadline
                 #tr = time.strftime("%H:%M:%S", _t.deadline) - time.strftime("%H:%M:%S", self.nowtime)
-                _strtsk = _t.location + ' - ' + _t.name # + '   Deadline: ' + _dl
+                _strtsk = _t.location + ' - ' + _t.desc # + '   Deadline: ' + _dl
                 _chk = _t.complete == 1
                 _chkbx = Checkbox(_chk, _strtsk, _x - 30, _y + 12)
                 _y = _y + _yofs

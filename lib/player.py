@@ -3,33 +3,26 @@ from pygame.locals import *
 import time
 
 class Task:
-    def __init__(self, _name, _location, _complete, _owner, _frequency):
-        self.name = _name
+    def __init__(self, _id, _desc, _location, _complete, _owner, _frequency, _recurring, _created, _deadline, _owner_id):
+        self.id = _id
+        self.desc = _desc
         self.owner = _owner
+        self.owner_id = _owner_id
         self.location = _location
         self.frequency = _frequency
+        self.recurring = _recurring
         self.complete = _complete
-        t = time.localtime()
-        self.dt_created = t
-        #dl = (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, t.tm_wday, t.tm_yday, t.tm_idst)
-        dl = (t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, t.tm_wday, t.tm_yday, t.tm_isdst)
-        if _frequency == 'daily':
-            dl = (t.tm_year, t.tm_mon, t.tm_mday, 23, 59, 0, t.tm_wday, t.tm_yday, t.tm_isdst)
-        if _frequency == 'weekly':
-            dl = (t.tm_year, t.tm_mon, t.tm_mday, 23, 59, 0, 7, t.tm_yday, t.tm_isdst)
-        
-        self.deadline = time.struct_time(dl)
-        self.date = time.strftime("%D", t)
-        self.time = time.strftime("%H:%M:%S", t)
-
+        self.created = _created
+        self.deadline = _deadline
 
 class Player(pygame.sprite.Sprite):
     step = 10
     direction = 'RIGHT'
     chosen = False
     
-    def __init__(self, _name, _color, _tasks=[]):
+    def __init__(self, _id, _name, _color, _tasks=[]):
         super().__init__()
+        self.id = _id
         self.name = _name
         self.color = _color
         self.tasks = _tasks
