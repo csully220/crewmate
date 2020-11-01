@@ -22,15 +22,25 @@ class NetworkDatabase:
             pid = pe.get('id')
             query = {'assignee':pid}
             
-            resp = requests.get(self.urlbase + 'tasks', params=query)
+            resp = requests.get(self.urlbase + 'playertasks', params=query)
             tasks = []
             task_elements = resp.json()
             for t in task_elements:
                 tid = t.get('id')
                 tn = t.get('desc')
                 tl = t.get('location')
-                tf = t.get('freq')
-                tr = t.get('recurring')
+                tf = t.get('once')
+                tr = t.get('monday')
+                tr = t.get('tuesday')
+                tr = t.get('wednesday')
+                tr = t.get('thursday')
+                tr = t.get('friday')
+                tr = t.get('saturday')
+                tr = t.get('sunday')
+                tr = t.get('biweekly')
+                tr = t.get('duethiswk')
+                tr = t.get('monthlyy')
+                tr = t.get('quarterly')
                 tc = int(t.get('complete'))
                 tcr = t.get('created')
                 tdl = t.get('deadline')
