@@ -81,6 +81,10 @@ class App:
         self.sprites.add(self.player)
 
         self.running = True
+        
+        # load sounds
+        self.task_sound = pygame.mixer.Sound(r'data/audio/task_complete.wav')
+        self.spawn_sound = pygame.mixer.Sound(r'data/audio/spawn.wav')
 
     def on_event(self, event):
         if event.type == QUIT:
@@ -226,6 +230,7 @@ class App:
                                 po.chosen = False
                                 if po.name == self.player.name:
                                     po.chosen = True
+                                    self.spawn_sound.play()
                             self.menu = 'TASKS'
                             self.bg = pygame.image.load(r'.\data\images\bg_sparse.png')
 
@@ -255,15 +260,17 @@ class App:
                                 elif self.player.tasks[idx].complete == 0:
                                     self.player.tasks[idx].complete = 1
                                     print('Task complete')
+                                    self.task_sound.play()
                                 self.db.updateTaskElement(self.player.tasks[idx])
                                 self.lastMenu = 'NONE'
                                 break;
                             idx += 1
                         for _b in self.buttons:
                         # EXIT
-                            if _b.action == 'exit':
-                                self.menu = 'WELCOME'
-                                self.bg = pygame.image.load(r'.\data\images\bg_welcome.png')
+                            if _b.rect.collidepoint(mspos):
+                                if _b.action == 'exit':
+                                    self.menu = 'WELCOME'
+                                    self.bg = pygame.image.load(r'.\data\images\bg_welcome.png')
                             
                     print(mspos)
                 if event.type == pygame.KEYDOWN:
