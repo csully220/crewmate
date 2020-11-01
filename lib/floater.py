@@ -14,10 +14,14 @@ class Floater(pygame.sprite.Sprite):
             _plyrimgstr = './data/images/players/floaters/floater_' + str(random.randrange(1, 6)) + '.png'
             self.image = pygame.image.load(_plyrimgstr).convert_alpha()
         
+        vel_max_x = 40
+        vel_max_y = 40
+        rot_max = 30
+        
         self.x = random.randrange(960-20, 960+20)
         self.y = random.randrange(540-20, 540+20)
-        self.vel = {'x':random.randrange(-12,12), 'y':random.randrange(-12,12)}
-        self.rotation = random.randrange(-12, 12)
+        self.vel = {'x':random.randrange(-(vel_max_x),vel_max_x), 'y':random.randrange(-(vel_max_y),vel_max_y)}
+        self.rotation = random.randrange(-(rot_max), rot_max)
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y

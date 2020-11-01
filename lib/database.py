@@ -10,6 +10,34 @@ class NetworkDatabase:
         self.server_port = _port
         self.urlbase = 'http://' + self.server_ip + ':' + self.server_port + '/tasker/api/'
 
+    def getPlayerTasks(self, player_id):
+        resp = requests.get(self.urlbase + 'playertasks/?assignee=' + str(player_id))
+        task_elements = resp.json()
+        tasks = []
+        for t in task_elements:
+            tid = t.get('id')
+            tn = t.get('desc')
+            tl = t.get('location')
+            tf = t.get('once')
+            tr = t.get('monday')
+            tr = t.get('tuesday')
+            tr = t.get('wednesday')
+            tr = t.get('thursday')
+            tr = t.get('friday')
+            tr = t.get('saturday')
+            tr = t.get('sunday')
+            tr = t.get('biweekly')
+            tr = t.get('duethiswk')
+            tr = t.get('monthlyy')
+            tr = t.get('quarterly')
+            tc = int(t.get('complete'))
+            tlc = t.get('last_completed')
+            tcr = t.get('created')
+            tdl = t.get('deadline')
+            tpid = t.get('assignee_id')
+            tasks.append(Task(tid, tn, tl, tc, pn, tf, tr, tcr, tdl, pid, tlc))
+        return tasks
+        
     def getAllPlayers(self):
         resp = requests.get(self.urlbase + 'players')
         player_elements = resp.json()
@@ -22,8 +50,9 @@ class NetworkDatabase:
             pid = pe.get('id')
             query = {'assignee':pid}
             
-            resp = requests.get(self.urlbase + 'playertasks', params=query)
+            resp = requests.get(self.urlbase + 'playertasks/', params=query)
             tasks = []
+            print(resp.json())
             task_elements = resp.json()
             for t in task_elements:
                 tid = t.get('id')
@@ -41,11 +70,12 @@ class NetworkDatabase:
                 tr = t.get('duethiswk')
                 tr = t.get('monthlyy')
                 tr = t.get('quarterly')
-                tc = int(t.get('complete'))
+                tc = t.get('complete')
                 tcr = t.get('created')
                 tdl = t.get('deadline')
-                tpid = t.get('owner_id')
-                tasks.append(Task(tid, tn, tl, tc, pn, tf, tr, tcr, tdl, pid))
+                tpid = t.get('assignee_id')
+                tlc = t.get('last_completed')
+                tasks.append(Task(tid, tn, tl, tc, pn, tf, tr, tcr, tdl, pid, tlc))
             new_player.tasks = tasks
             players.append(new_player)
         return players
@@ -65,7 +95,7 @@ class NetworkDatabase:
             jstr['deadline'] = el.deadline
             jstr['complete'] = el.complete
             jstr['created'] = el.created
-            jstr['assignee'] = el.owner_id
+            jstr['assignee'] = el.assignee_id
             return jstr
 
 class XmlDatabase:
@@ -101,14 +131,14 @@ class XmlDatabase:
             if pe.get('name') == _name:
                 return pe
         
-    def getTaskElements(self, _owner):
-        pe = getPlayerElement
+    def getTaskElements(self, _assignee):
+        
         task_elements = pe.find('Tasks').findall('Task')
         return task_elements
 
     def updateTaskElement(self, _task):
         for pe in self.player_elements:
-            if pe.get('name') == _task.owner:
+            if pe.get('name') == _task.assignee:
                 task_elements = pe.find('Tasks').findall('Task')
                 for te in task_elements:
                     if te.get('name') == _task.name:

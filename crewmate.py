@@ -83,8 +83,10 @@ class App:
         self.running = True
         
         # load sounds
-        self.task_sound = pygame.mixer.Sound(r'data/audio/task_complete.wav')
+        self.task_complete_sound = pygame.mixer.Sound(r'data/audio/task_complete.wav')
         self.spawn_sound = pygame.mixer.Sound(r'data/audio/spawn.wav')
+        self.round_start_sound = pygame.mixer.Sound(r'data/audio/round_start.wav')
+        self.task_incomplete_sound = pygame.mixer.Sound(r'data/audio/task_incomplete.wav')
 
     def on_event(self, event):
         if event.type == QUIT:
@@ -128,22 +130,22 @@ class App:
                 self.addWidget(Button('tasks', 'Progress', 970, 660))
                 self.addWidget(Button('exit', 'Exit', 100, 900))
 
-        if self.menu == 'TASKS':
-            _x = 90
-            _y = 200
-            _yofs = 40
-            # Player tasks
-            for _t in self.player.tasks:
-                #print(t)
-                _dl = _t.deadline
-                #tr = time.strftime("%H:%M:%S", _t.deadline) - time.strftime("%H:%M:%S", self.nowtime)
-                _strtsk = _t.location + ' - ' + _t.desc # + '   Deadline: ' + _dl
-                _chk = _t.complete == 1
-                _chkbx = Checkbox(_chk, _strtsk, _x - 30, _y + 12)
-                _y = _y + _yofs
-                self.addWidget(_chkbx)
-                
-            self.addWidget(Button('exit', 'Exit', 100, 900))
+            if self.menu == 'TASKS':
+                _x = 90
+                _y = 200
+                _yofs = 40
+                # Player tasks
+                for _t in self.player.tasks:
+                    #print(t)
+                    #_dl = _t.deadline
+                    #tr = time.strftime("%H:%M:%S", _t.deadline) - time.strftime("%H:%M:%S", self.nowtime)
+                    _strtsk = str(_t.id) + '  ' + _t.location + ' - ' + _t.desc # + '   Deadline: ' + _dl
+                    _chk = _t.complete == 1
+                    _chkbx = TaskCheckbox(_chk, _strtsk, _x - 30, _y + 12, _t.id)
+                    _y = _y + _yofs
+                    self.addWidget(_chkbx)
+                    
+                self.addWidget(Button('exit', 'Exit', 100, 900))
 
     def on_render(self):
         self.display_surf.blit(self.bg, (0, 0))
@@ -203,10 +205,11 @@ class App:
     def on_execute(self):
         if self.on_init() == False:
             self.running = False
- 
+        self.round_start_sound.play()
         while( self.running ):
             pygame.event.pump()
             ev = pygame.event.get()
+            
             mspos = pygame.mouse.get_pos()
             for _b in self.buttons:
                 if _b.get_rect().collidepoint(mspos):
@@ -223,7 +226,7 @@ class App:
                         _plyrclkd = False
                         for _pb in self.plyrbtns:
                             if _pb.get_rect().collidepoint(mspos):
-                                print('Chose ' + _pb.name)
+                                #print('Chose ' + _pb.name)
                                 self.sprites.remove(self.player)
                                 self.player = self.players[_pb.name]
                                 self.sprites.add(self.player)
@@ -241,7 +244,7 @@ class App:
                         # OTHER BUTTONS
                         for _b in self.buttons:
                             if _b.rect.collidepoint(mspos):
-                                print(_b.action)
+                                #print(_b.action)
                                 if _b.action == 'common':
                                     self.player = self.players['Common']
                                     self.menu = 'TASKS'
@@ -258,13 +261,13 @@ class App:
                             _tbrect = pygame.Rect(tb.x, tb.y, tb.w, tb.h)
                             if _tbrect.collidepoint(mspos):
                                 print(idx)
-                                if self.player.tasks[idx].complete > 0:
-                                    self.player.tasks[idx].complete = 0
-                                    print('Task incomplete')
-                                elif self.player.tasks[idx].complete == 0:
-                                    self.player.tasks[idx].complete = 1
-                                    print('Task complete')
-                                    self.task_sound.play()
+                                if self.player.tasks[idx].complete:
+                                    self.task_incomplete_sound.play()
+                                    self.player.tasks[idx].complete = False
+                                else:
+                                    self.task_complete_sound.play()
+                                    self.player.tasks[idx].complete = True
+                                    
                                 self.db.updateTaskElement(self.player.tasks[idx])
                                 self.lastMenu = 'NONE'
                                 break;
@@ -323,7 +326,7 @@ class App:
         self.on_cleanup()
         
     def addWidget(self, widget):
-        if type(widget) == Checkbox:
+        if type(widget) == TaskCheckbox:
             #print('Checkbox')
             self.tskbtns.append(widget)
         if type(widget) == Button:

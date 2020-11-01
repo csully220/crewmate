@@ -19,9 +19,9 @@ class Taskbar():
         surface.blit(self.img,(self.x,self.y))
 
 class Checkbox():
-    def __init__(self, _checked=False, _desc='', _x=0, _y=0):
+    def __init__(self, _checked=False, _label='', _x=0, _y=0):
         self.checked = _checked
-        self.desc = _desc
+        self.label = _label
         self.x = _x
         self.y = _y
         self.w = 40 
@@ -32,15 +32,39 @@ class Checkbox():
         _font = pygame.font.SysFont('Comic Sans MS', 26)
         if self.checked:
             self.img = pygame.image.load(r'./data/images/buttons/check.png')
-            _desc = _font.render(self.desc, False, green)
+            _desc = _font.render(self.label, False, green)
 
         else:
             self.img = pygame.image.load(r'./data/images/buttons/nocheck.png')
-            _desc = _font.render(self.desc, False, white)
+            _desc = _font.render(self.label, False, white)
 
         surface.blit(self.img,(self.x,self.y))
         surface.blit(_desc,(self.x + 30,self.y - 12))
 
+class TaskCheckbox(Checkbox):
+    def __init__(self, _checked=False, _label='', _x=0, _y=0, _id=0):
+        self.id = _id
+        self.checked = _checked
+        self.label = _label
+        self.x = _x
+        self.y = _y
+        self.w = 40 
+        self.h = 40
+        self.rect = pygame.Rect(_x, _y, self.w, self.h)
+
+    def draw(self, surface):
+        _font = pygame.font.SysFont('Comic Sans MS', 26)
+        if self.checked:
+            self.img = pygame.image.load(r'./data/images/buttons/check.png')
+            _desc = _font.render(self.label, False, green)
+
+        else:
+            self.img = pygame.image.load(r'./data/images/buttons/nocheck.png')
+            _desc = _font.render(self.label, False, white)
+
+        surface.blit(self.img,(self.x,self.y))
+        surface.blit(_desc,(self.x + 30,self.y - 12))
+        
 class Button():
     def __init__(self, _action, _label, _x, _y):
         self.img = pygame.image.load(r'./data/images/buttons/blank.png')
