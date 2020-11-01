@@ -176,10 +176,14 @@ class App:
             scaled_w = round(fill_w * ratio)
             
             tbar = pygame.image.load(r'.\data\images\taskbar.png')
-            tbar_fill= pygame.Rect(66, 66, scaled_w, 68)
+            tbar_fill = pygame.Rect(66, 66, scaled_w, 68)
             self.display_surf.blit(tbar, (60, 60))
             pygame.draw.rect(self.display_surf, green, tbar_fill)
             self.display_surf.blit(tbar, (60, 60))
+
+            role = pygame.image.load(r'.\data\images\crewmate.png')
+            self.display_surf.blit(role, (1060, 50))
+            
             if self.player.name != 'Common':
                 _lbl = self.player.name + '\'s Tasks:'
             else:
@@ -232,7 +236,7 @@ class App:
                                     po.chosen = True
                                     self.spawn_sound.play()
                             self.menu = 'TASKS'
-                            self.bg = pygame.image.load(r'.\data\images\bg_sparse.png')
+                            self.bg = pygame.image.load(r'.\data\images\bg_empty.png')
 
                         # OTHER BUTTONS
                         for _b in self.buttons:
@@ -241,7 +245,7 @@ class App:
                                 if _b.action == 'common':
                                     self.player = self.players['Common']
                                     self.menu = 'TASKS'
-                                    self.bg = pygame.image.load(r'.\data\images\bg_sparse.png')
+                                    self.bg = pygame.image.load(r'.\data\images\bg_empty.png')
                                 if _b.action == 'exit':
                                     # EXIT
                                     print('Exit!')
@@ -270,7 +274,7 @@ class App:
                             if _b.rect.collidepoint(mspos):
                                 if _b.action == 'exit':
                                     self.menu = 'WELCOME'
-                                    self.bg = pygame.image.load(r'.\data\images\bg_welcome.png')
+                                    self.bg = pygame.image.load(r'.\data\images\bg_title.png')
                             
                     print(mspos)
                 if event.type == pygame.KEYDOWN:
