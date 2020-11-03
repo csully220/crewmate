@@ -18,11 +18,8 @@ class App:
     plyrbtns = []
     tskbtns = []
     buttons = []
-    
-
 
     def __init__(self):
-        self.clock = pygame.time.Clock()    
         self.clock = pygame.time.Clock()
         self.running = True
         self.display_surf = None
@@ -134,18 +131,26 @@ class App:
                 _x = 90
                 _y = 200
                 _yofs = 40
-                # Player tasks
-                for _t in self.player.tasks:
-                    #print(t)
-                    #_dl = _t.deadline
-                    #tr = time.strftime("%H:%M:%S", _t.deadline) - time.strftime("%H:%M:%S", self.nowtime)
-                    _strtsk = str(_t.id) + '  ' + _t.location + ' - ' + _t.desc # + '   Deadline: ' + _dl
-                    _chk = _t.complete == 1
-                    _chkbx = TaskCheckbox(_chk, _strtsk, _x - 30, _y + 12, _t.id)
+                # PLAYER TASK CHECKBOXES
+                playertasks = self.db.getPlayerTasks(self.player.id)
+                for _t in playertasks:
+                    _strtsk = _t.location + ' - ' + _t.desc
+                    _chkbx = TaskCheckbox(_t.complete, _strtsk, _x - 30, _y + 12, _t.id)
                     _y = _y + _yofs
                     self.addWidget(_chkbx)
+                # COMMON TASK CHECKBOXES
+                _x = 960
+                _y = 200
+                _yofs = 40
+                if self.player.name != 'Common':
+                    commontasks = self.db.getPlayerTasks(self.players['Common'].id)
+                    for _t in commontasks:
+                        _strtsk = _t.location + ' - ' + _t.desc
+                        _chkbx = TaskCheckbox(_t.complete, _strtsk, _x - 30, _y + 12, _t.id)
+                        _y = _y + _yofs
+                        self.addWidget(_chkbx)
                     
-                self.addWidget(Button('exit', 'Exit', 100, 900))
+                self.addWidget(Button('exit', 'Back', 100, 900))
 
     def on_render(self):
         self.display_surf.blit(self.bg, (0, 0))

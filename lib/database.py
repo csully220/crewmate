@@ -11,35 +11,48 @@ class NetworkDatabase:
         self.urlbase = 'http://' + self.server_ip + ':' + self.server_port + '/tasker/api/'
 
     def getPlayerTasks(self, player_id):
-        resp = requests.get(self.urlbase + 'playertasks/?assignee=' + str(player_id))
+        try:
+            resp = requests.get(self.urlbase + 'playertasks/?assignee=' + str(player_id))
+        except:
+            return False
         task_elements = resp.json()
         tasks = []
         for t in task_elements:
+            freq_data = {}
             tid = t.get('id')
-            tn = t.get('desc')
+            tdesc = t.get('desc')
             tl = t.get('location')
-            tf = t.get('once')
-            tr = t.get('monday')
-            tr = t.get('tuesday')
-            tr = t.get('wednesday')
-            tr = t.get('thursday')
-            tr = t.get('friday')
-            tr = t.get('saturday')
-            tr = t.get('sunday')
-            tr = t.get('biweekly')
-            tr = t.get('duethiswk')
-            tr = t.get('monthlyy')
-            tr = t.get('quarterly')
-            tc = int(t.get('complete'))
-            tlc = t.get('last_completed')
-            tcr = t.get('created')
-            tdl = t.get('deadline')
+            freq_data['once'] = t.get('once')
+            freq_data['monday'] = t.get('monday')
+            freq_data['tuesday'] = t.get('tuesday')
+            freq_data['wednesday'] = t.get('wednesday')
+            freq_data['thursday'] = t.get('thursday')
+            freq_data['friday'] = t.get('friday')
+            freq_data['saturday'] = t.get('saturday')
+            freq_data['sunday'] = t.get('sunday')
+            freq_data['biweekly'] = t.get('biweekly')
+            freq_data['duethiswk'] = t.get('duethiswk')
+            freq_data['monthly'] = t.get('monthly')
+            freq_data['quarterly'] = t.get('quarterly')
+            tcomplete = t.get('complete')
+            tcreated = t.get('created')
             tpid = t.get('assignee_id')
-            tasks.append(Task(tid, tn, tl, tc, pn, tf, tr, tcr, tdl, pid, tlc))
+            tlastcompleted = t.get('last_completed')
+            tasks.append(Task(_id=tid, 
+                              _desc=tdesc, 
+                              _location=tl, 
+                              _complete=tcomplete, 
+                              _assignee_id=tpid, 
+                              _created=tcreated, 
+                              _last_completed=tlastcompleted, 
+                              _freq_data=freq_data))
         return tasks
         
     def getAllPlayers(self):
-        resp = requests.get(self.urlbase + 'players')
+        try:
+            resp = requests.get(self.urlbase + 'players')
+        except:
+            return False
         player_elements = resp.json()
         players = []
         for pe in player_elements:
@@ -49,39 +62,44 @@ class NetworkDatabase:
             new_player = Player(pid, pn, pc)
             pid = pe.get('id')
             query = {'assignee':pid}
-            
-            resp = requests.get(self.urlbase + 'playertasks/', params=query)
+            try:
+                resp = requests.get(self.urlbase + 'playertasks/', params=query)
+            except:
+                return False
             tasks = []
             print(resp.json())
             task_elements = resp.json()
             for t in task_elements:
+                freq_data = {}
                 tid = t.get('id')
-                tn = t.get('desc')
+                tdesc = t.get('desc')
                 tl = t.get('location')
-                tf = t.get('once')
-                tr = t.get('monday')
-                tr = t.get('tuesday')
-                tr = t.get('wednesday')
-                tr = t.get('thursday')
-                tr = t.get('friday')
-                tr = t.get('saturday')
-                tr = t.get('sunday')
-                tr = t.get('biweekly')
-                tr = t.get('duethiswk')
-                tr = t.get('monthlyy')
-                tr = t.get('quarterly')
-                tc = t.get('complete')
-                tcr = t.get('created')
-                tdl = t.get('deadline')
+                freq_data['once'] = t.get('once')
+                freq_data['monday'] = t.get('monday')
+                freq_data['tuesday'] = t.get('tuesday')
+                freq_data['wednesday'] = t.get('wednesday')
+                freq_data['thursday'] = t.get('thursday')
+                freq_data['friday'] = t.get('friday')
+                freq_data['saturday'] = t.get('saturday')
+                freq_data['sunday'] = t.get('sunday')
+                freq_data['biweekly'] = t.get('biweekly')
+                freq_data['duethiswk'] = t.get('duethiswk')
+                freq_data['monthly'] = t.get('monthly')
+                freq_data['quarterly'] = t.get('quarterly')
+                tcomplete = t.get('complete')
+                tcreated = t.get('created')
                 tpid = t.get('assignee_id')
-                tlc = t.get('last_completed')
-                tasks.append(Task(tid, tn, tl, tc, pn, tf, tr, tcr, tdl, pid, tlc))
+                tlastcompleted = t.get('last_completed')
+                tasks.append(Task(_id=tid, _desc=tdesc, _location=tl, _complete=tcomplete, _assignee_id=tpid, _created=tcreated, _last_completed=tlastcompleted, _freq_data=freq_data))
             new_player.tasks = tasks
             players.append(new_player)
         return players
 
     def updateTaskElement(self, task):
-        resp = requests.put(self.urlbase + 'tasks/' + str(task.id) + '/', json=self.serialize(task))
+        try:
+            resp = requests.put(self.urlbase + 'tasks/' + str(task.id) + '/', json=self.serialize(task))
+        except:
+            return False
         print(resp.json())
     
     def serialize(self, el):
@@ -90,12 +108,23 @@ class NetworkDatabase:
             jstr['id'] = el.id
             jstr['desc'] = el.desc
             jstr['location'] = el.location
-            jstr['recurring'] = el.recurring
-            jstr['freq'] = el.frequency
-            jstr['deadline'] = el.deadline
             jstr['complete'] = el.complete
             jstr['created'] = el.created
-            jstr['assignee'] = el.assignee_id
+            jstr['last_completed'] = el.last_completed
+            
+            jstr['once'] = el.freq_data['once']
+            jstr['monday'] = el.freq_data['monday']
+            jstr['tuesday'] = el.freq_data['tuesday']
+            jstr['wednesday'] = el.freq_data['wednesday']
+            jstr['thursday'] = el.freq_data['thursday']
+            jstr['friday'] = el.freq_data['friday']
+            jstr['saturday'] = el.freq_data['saturday']
+            jstr['sunday'] = el.freq_data['sunday']
+            jstr['biweekly'] = el.freq_data['biweekly']
+            jstr['duethiswk'] = el.freq_data['duethiswk']
+            jstr['monthly'] = el.freq_data['monthly']
+            jstr['quarterly'] = el.freq_data['quarterly']
+
             return jstr
 
 class XmlDatabase:

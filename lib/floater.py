@@ -11,7 +11,7 @@ class Floater(pygame.sprite.Sprite):
         try:
             self.image = pygame.image.load(_plyrimgstr).convert_alpha()
         except pygame.error:
-            _plyrimgstr = './data/images/players/floaters/floater_' + str(random.randrange(1, 6)) + '.png'
+            _plyrimgstr = './data/images/players/floaters/floater_' + str(random.randrange(1, 8)) + '.png'
             self.image = pygame.image.load(_plyrimgstr).convert_alpha()
         
         vel_max_x = 40

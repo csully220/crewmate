@@ -3,17 +3,14 @@ from pygame.locals import *
 import time
 
 class Task:
-    def __init__(self, _id, _desc, _location, _complete, _assignee, _frequency, _recurring, _created, _deadline, _assignee_id, _last_completed):
+    def __init__(self, _id='', _desc='', _location='', _complete='', _freq_data={}, _created='', _assignee_id='', _last_completed=''):
         self.id = _id
         self.desc = _desc
-        self.assignee = _assignee
         self.assignee_id = _assignee_id
         self.location = _location
-        self.frequency = _frequency
-        self.recurring = _recurring
         self.complete = _complete
         self.created = _created
-        self.deadline = _deadline
+        self.freq_data = _freq_data
         self.last_completed = _last_completed
 
 class Player(pygame.sprite.Sprite):
