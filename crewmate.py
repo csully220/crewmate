@@ -18,6 +18,7 @@ class App:
     plyrbtns = []
     tskbtns = []
     buttons = []
+    taskstosave = {}
 
     def __init__(self):
         self.clock = pygame.time.Clock()
@@ -129,10 +130,10 @@ class App:
 
             if self.menu == 'TASKS':
                 _x = 90
-                _y = 200
+                _y = 240
                 _yofs = 40
                 # PLAYER TASK CHECKBOXES
-                playertasks = self.db.getPlayerTasks(self.player.id)
+                playertasks = self.player.tasks
                 for _t in playertasks:
                     _strtsk = _t.location + ' - ' + _t.desc
                     _chkbx = TaskCheckbox(_t.complete, _strtsk, _x - 30, _y + 12, _t.id)
@@ -140,7 +141,7 @@ class App:
                     self.addWidget(_chkbx)
                 # COMMON TASK CHECKBOXES
                 _x = 960
-                _y = 200
+                _y = 240
                 _yofs = 40
                 if self.player.name != 'Common':
                     commontasks = self.db.getPlayerTasks(self.players['Common'].id)
@@ -195,9 +196,12 @@ class App:
                 _lbl = self.player.name + '\'s Tasks:'
             else:
                 _lbl = self.player.name + ' Tasks:'
-            self.display_surf.blit(self.font_med.render(_lbl , False, white), (60,160))
+            self.display_surf.blit(self.font_med.render(_lbl , False, white), (60,180))
             for _t in self.tskbtns:
                 _t.draw(self.display_surf)
+
+            _lbl = self.player.name + 'Common Tasks:'
+            self.display_surf.blit(self.font_med.render(_lbl , False, white), (960,180))
             for _b in self.buttons:
                 _b.draw(self.display_surf)    
         #self.sprites.draw(self.display_surf)
@@ -262,18 +266,20 @@ class App:
                     elif self.menu == 'TASKS':
                         # TASK CHECKBOXES
                         idx = 0
+                        
                         for tb in self.tskbtns:
                             _tbrect = pygame.Rect(tb.x, tb.y, tb.w, tb.h)
                             if _tbrect.collidepoint(mspos):
                                 print(idx)
+                                
                                 if self.player.tasks[idx].complete:
                                     self.task_incomplete_sound.play()
                                     self.player.tasks[idx].complete = False
                                 else:
                                     self.task_complete_sound.play()
                                     self.player.tasks[idx].complete = True
-                                    
-                                self.db.updateTaskElement(self.player.tasks[idx])
+                                self.taskstosave[idx] = (self.player.tasks[idx])    
+                                #self.db.updateTaskElement(self.player.tasks[idx])
                                 self.lastMenu = 'NONE'
                                 break;
                             idx += 1
@@ -281,6 +287,8 @@ class App:
                         # EXIT
                             if _b.rect.collidepoint(mspos):
                                 if _b.action == 'exit':
+                                    for t in self.taskstosave.items():
+                                        self.db.updateTaskComplete(t[1])
                                     self.menu = 'WELCOME'
                                     self.bg = pygame.image.load(r'.\data\images\bg_title.png')
                             
@@ -303,25 +311,21 @@ class App:
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
                         
-
-            keys = pygame.key.get_pressed() 
- 
+            keys = pygame.key.get_pressed()
+            
             if (keys[K_RIGHT]):
                 self.player.moveRight()
- 
             if (keys[K_LEFT]):
                 self.player.moveLeft()
- 
             if (keys[K_UP]):
                 self.player.moveUp()
- 
             if (keys[K_DOWN]):
                 self.player.moveDown()
             if (keys[K_SPACE]):
                 self.player.stop()
             if (keys[K_ESCAPE]):
                 self.running = False
-                
+
             self.on_loop()
             self.on_render()
 
@@ -329,7 +333,7 @@ class App:
 
         #self.db.saveAll()
         self.on_cleanup()
-        
+
     def addWidget(self, widget):
         if type(widget) == TaskCheckbox:
             #print('Checkbox')
@@ -339,7 +343,7 @@ class App:
             self.buttons.append(widget)
         if type(widget) == PlayerButton:
             #print('Player Button')
-            self.plyrbtns.append(widget)   
+            self.plyrbtns.append(widget)
 
     def updateFloaters(self):
         ob = [] #out of bounds

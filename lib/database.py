@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from lib.player import *
 import requests
 import datetime
+import pytz
 
 class NetworkDatabase:
     
@@ -9,6 +10,53 @@ class NetworkDatabase:
         self.server_ip = _ip
         self.server_port = _port
         self.urlbase = 'http://' + self.server_ip + ':' + self.server_port + '/tasker/api/'
+
+    def getPlayer(self):
+        try:
+            resp = requests.get(self.urlbase + 'players')
+        except:
+            return False
+        player_elements = resp.json()
+        players = []
+        for pe in player_elements:
+            pn = pe.get('name')
+            pc = pe.get('color')
+            pid = pe.get('id')
+            new_player = Player(pid, pn, pc)
+            pid = pe.get('id')
+            query = {'assignee':pid}
+            try:
+                resp = requests.get(self.urlbase + 'player/', params=query)
+            except:
+                return False
+            tasks = []
+            print(resp.json())
+            task_elements = resp.json()
+            for t in task_elements:
+                freq_data = {}
+                tid = t.get('id')
+                tdesc = t.get('desc')
+                tl = t.get('location')
+                freq_data['once'] = t.get('once')
+                freq_data['monday'] = t.get('monday')
+                freq_data['tuesday'] = t.get('tuesday')
+                freq_data['wednesday'] = t.get('wednesday')
+                freq_data['thursday'] = t.get('thursday')
+                freq_data['friday'] = t.get('friday')
+                freq_data['saturday'] = t.get('saturday')
+                freq_data['sunday'] = t.get('sunday')
+                freq_data['biweekly'] = t.get('biweekly')
+                freq_data['duethiswk'] = t.get('duethiswk')
+                freq_data['monthly'] = t.get('monthly')
+                freq_data['quarterly'] = t.get('quarterly')
+                tcomplete = t.get('complete')
+                tcreated = t.get('created')
+                tpid = t.get('assignee_id')
+                tlastcompleted = t.get('last_completed')
+                tasks.append(Task(_id=tid, _desc=tdesc, _location=tl, _complete=tcomplete, _assignee_id=tpid, _created=tcreated, _last_completed=tlastcompleted, _freq_data=freq_data))
+            new_player.tasks = tasks
+            players.append(new_player)
+        return players
 
     def getPlayerTasks(self, player_id):
         try:
@@ -67,7 +115,7 @@ class NetworkDatabase:
             except:
                 return False
             tasks = []
-            print(resp.json())
+            #print(resp.json())
             task_elements = resp.json()
             for t in task_elements:
                 freq_data = {}
@@ -90,18 +138,20 @@ class NetworkDatabase:
                 tcreated = t.get('created')
                 tpid = t.get('assignee_id')
                 tlastcompleted = t.get('last_completed')
+                print(tlastcompleted)
                 tasks.append(Task(_id=tid, _desc=tdesc, _location=tl, _complete=tcomplete, _assignee_id=tpid, _created=tcreated, _last_completed=tlastcompleted, _freq_data=freq_data))
             new_player.tasks = tasks
             players.append(new_player)
         return players
 
-    def updateTaskElement(self, task):
+    def updateTaskComplete(self, task):
+        task.last_completed = datetime.datetime.now().strftime('%y-%m-%d, %H:%M:%S')
         try:
             resp = requests.put(self.urlbase + 'tasks/' + str(task.id) + '/', json=self.serialize(task))
         except:
             return False
-        print(resp.json())
-    
+        #print(resp.json())
+
     def serialize(self, el):
         if type(el) == Task:
             jstr = {}
@@ -124,7 +174,7 @@ class NetworkDatabase:
             jstr['duethiswk'] = el.freq_data['duethiswk']
             jstr['monthly'] = el.freq_data['monthly']
             jstr['quarterly'] = el.freq_data['quarterly']
-
+            
             return jstr
 
 class XmlDatabase:
