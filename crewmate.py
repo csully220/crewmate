@@ -6,6 +6,7 @@ import requests
 
 from lib.widgets import *
 from lib.player import *
+from lib.task import *
 from lib.floater import *
 from lib.database import *
 
@@ -19,6 +20,8 @@ class App:
     tskbtns = []
     buttons = []
     taskstosave = {}
+    fullscreen = False
+    fullscreen_prev = False
 
     def __init__(self):
         self.clock = pygame.time.Clock()
@@ -34,7 +37,6 @@ class App:
             port = config['network']['server_port']
             self.db = NetworkDatabase(ip, port)
 
-        
         #for p in self.players:
         #    print("Players:")
         #    print(p.name)
@@ -44,22 +46,25 @@ class App:
         #        print(t.name)
         #        print(t.location)
         #        print(t.complete)
-
         #format the menus
 
     def on_init(self):
         pygame.init()
         pygame.font.init()
-        self.display_surf = pygame.display.set_mode((self.windowWidth,self.windowHeight), pygame.RESIZABLE)
-        #self.display_surf = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+        if self.fullscreen:
+            self.display_surf = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+        else:
+            self.display_surf = pygame.display.set_mode((self.windowWidth,self.windowHeight), pygame.RESIZABLE)
 
         pygame.display.set_caption('Crewmate IRL Task Simulator')
 
         #read in the player information
         _plyrs = self.db.getAllPlayers()
         self.players = {}
+        firstplyr = True
         for _p in _plyrs:
             self.players[_p.name] = _p
+            
         self.floaters = pygame.sprite.Group()
         self.sprites = pygame.sprite.Group()
 
@@ -135,6 +140,7 @@ class App:
                 # PLAYER TASK CHECKBOXES
                 playertasks = self.player.tasks
                 for _t in playertasks:
+                    _t.isOverDue()
                     _strtsk = _t.location + ' - ' + _t.desc
                     _chkbx = TaskCheckbox(_t.complete, _strtsk, _x - 30, _y + 12, _t.id)
                     _y = _y + _yofs
@@ -144,13 +150,12 @@ class App:
                 _y = 240
                 _yofs = 40
                 if self.player.name != 'Common':
-                    commontasks = self.db.getPlayerTasks(self.players['Common'].id)
-                    for _t in commontasks:
+                    #commontasks = self.db.getPlayerTasks(self.players['Common'].id)
+                    for _t in self.players['Common'].tasks:
                         _strtsk = _t.location + ' - ' + _t.desc
                         _chkbx = TaskCheckbox(_t.complete, _strtsk, _x - 30, _y + 12, _t.id)
                         _y = _y + _yofs
                         self.addWidget(_chkbx)
-                    
                 self.addWidget(Button('exit', 'Back', 100, 900))
 
     def on_render(self):
@@ -200,7 +205,7 @@ class App:
             for _t in self.tskbtns:
                 _t.draw(self.display_surf)
 
-            _lbl = self.player.name + 'Common Tasks:'
+            _lbl = 'Common Tasks:'
             self.display_surf.blit(self.font_med.render(_lbl , False, white), (960,180))
             for _b in self.buttons:
                 _b.draw(self.display_surf)    
@@ -266,34 +271,39 @@ class App:
                     elif self.menu == 'TASKS':
                         # TASK CHECKBOXES
                         idx = 0
-                        
                         for tb in self.tskbtns:
                             _tbrect = pygame.Rect(tb.x, tb.y, tb.w, tb.h)
                             if _tbrect.collidepoint(mspos):
-                                print(idx)
-                                
-                                if self.player.tasks[idx].complete:
-                                    self.task_incomplete_sound.play()
-                                    self.player.tasks[idx].complete = False
+                                if tb.id == self.players['Common'].id:
+                                    if self.players['Common'].tasks[idx].complete:
+                                        self.players['Common'].tasks[idx].complete = False
+                                    else:
+                                        self.players['Common'].tasks[idx].complete = True
+                                    self.taskstosave[idx] = self.players['Common'].tasks[idx]
+
                                 else:
-                                    self.task_complete_sound.play()
-                                    self.player.tasks[idx].complete = True
-                                self.taskstosave[idx] = (self.player.tasks[idx])    
-                                #self.db.updateTaskElement(self.player.tasks[idx])
-                                self.lastMenu = 'NONE'
-                                break;
+                                    if self.player.tasks[idx].complete:
+                                        self.task_incomplete_sound.play()
+                                        self.player.tasks[idx].complete = False
+                                    else:
+                                        self.task_complete_sound.play()
+                                        self.player.tasks[idx].complete = True
+                                    self.taskstosave[idx] = (self.player.tasks[idx])    
+                                    #self.db.updateTaskElement(self.player.tasks[idx])
+                                    self.lastMenu = 'NONE'
+                                    break;
                             idx += 1
                         for _b in self.buttons:
-                        # EXIT
+                        # BACK
                             if _b.rect.collidepoint(mspos):
                                 if _b.action == 'exit':
                                     for t in self.taskstosave.items():
-                                        self.db.updateTaskComplete(t[1])
+                                        self.db.updateTaskElement(t[1])
                                     self.menu = 'WELCOME'
                                     self.bg = pygame.image.load(r'.\data\images\bg_title.png')
                             
                     print(mspos)
-                if event.type == pygame.KEYDOWN:
+                elif event.type == pygame.KEYDOWN:
 ##                    if event.key == pygame.K_RIGHT:
 ##                        self.player.moveRight()
 ##                        #print('right')
@@ -309,8 +319,15 @@ class App:
                     if event.key == pygame.K_SPACE:
                         self.player.stop()
                     if event.key == pygame.K_ESCAPE:
-                        self.running = False
-                        
+                        self.fullscreen = not self.fullscreen
+                        if self.fullscreen:
+                            self.display_surf = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+                        else:
+                            self.display_surf = pygame.display.set_mode((self.windowWidth,self.windowHeight), pygame.RESIZABLE)
+
+                elif event.type == pygame.QUIT:
+                    self.running = False
+                    
             keys = pygame.key.get_pressed()
             
             if (keys[K_RIGHT]):
