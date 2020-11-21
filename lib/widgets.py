@@ -82,9 +82,10 @@ class Button():
 
     def draw(self, surface):
         _font = pygame.font.SysFont('Comic Sans MS', 32)
+        _color = white
         if self.action == 'exit':
             if self.active:
-                _color = green
+                #_color = green
                 _img = pygame.image.load(r'./data/images/buttons/exit_active.png')
             else:
                 _color = white
@@ -95,10 +96,10 @@ class Button():
             surface.blit(_lbl,(self.x + 50,self.y + 16))
 
         else:
-            _color = white
+            
             _img = pygame.image.load(r'./data/images/buttons/blank.png')
             if self.active:
-                _color = green
+                #_color = green
                 _img = pygame.image.load(r'./data/images/buttons/active.png')
             _lbl = _font.render(self.label, False, _color)
             surface.blit(_img,(self.x,self.y))

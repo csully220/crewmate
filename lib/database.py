@@ -10,7 +10,7 @@ class NetworkDatabase:
     def __init__(self, _ip='127.0.0.1', _port='8000'):
         self.server_ip = _ip
         self.server_port = _port
-        self.urlbase = 'http://' + self.server_ip + ':' + self.server_port + '/tasker/api/'
+        self.urlbase = 'http://' + self.server_ip + ':' + self.server_port + '/taskapi/'
 
     def getPlayer(self, pk):
         try:
