@@ -34,27 +34,23 @@ class NetworkDatabase:
         print(resp.json())
         task_elements = resp.json()
         for t in task_elements:
-            freq_data = {}
-            tid = t.get('id')
-            tdesc = t.get('desc')
-            tl = t.get('location')
-            freq_data['once'] = t.get('once')
-            freq_data['monday'] = t.get('monday')
-            freq_data['tuesday'] = t.get('tuesday')
-            freq_data['wednesday'] = t.get('wednesday')
-            freq_data['thursday'] = t.get('thursday')
-            freq_data['friday'] = t.get('friday')
-            freq_data['saturday'] = t.get('saturday')
-            freq_data['sunday'] = t.get('sunday')
-            freq_data['biweekly'] = t.get('biweekly')
-            freq_data['duethiswk'] = t.get('duethiswk')
-            freq_data['monthly'] = t.get('monthly')
-            freq_data['quarterly'] = t.get('quarterly')
-            tcomplete = t.get('complete')
-            tcreated = t.get('created')
-            tpid = t.get('assignee_id')
-            tlastcompleted = t.get('last_completed')
-            tasks.append(Task(_id=tid, _desc=tdesc, _location=tl, _complete=tcomplete, _assignee_id=tpid, _created=tcreated, _last_completed=tlastcompleted, _freq_data=freq_data))
+        
+            id = t.get('id')
+            start = t.get('start')
+            end = t.get('end')
+            title = t.get('title')
+            description = t.get('description')
+            created_on = t.get('created_on')
+            updated_on = t.get('updated_on')
+            end_recurring_period = t.get('end_recurring_period')
+            color_event = t.get('color')
+            location = t.get('location')
+            creator = t.get('creator')
+            rule = t.get('rule')
+            calendar = t.get('calendar')
+            assignee = t.get('assignee')
+            
+            tasks.append(Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee))
         new_player.tasks = tasks
         return new_player
 
@@ -67,34 +63,23 @@ class NetworkDatabase:
         task_elements = resp.json()
         tasks = []
         for t in task_elements:
-            freq_data = {}
-            tid = t.get('id')
-            tdesc = t.get('desc')
-            tl = t.get('location')
-            freq_data['once'] = t.get('once')
-            freq_data['monday'] = t.get('monday')
-            freq_data['tuesday'] = t.get('tuesday')
-            freq_data['wednesday'] = t.get('wednesday')
-            freq_data['thursday'] = t.get('thursday')
-            freq_data['friday'] = t.get('friday')
-            freq_data['saturday'] = t.get('saturday')
-            freq_data['sunday'] = t.get('sunday')
-            freq_data['biweekly'] = t.get('biweekly')
-            freq_data['duethiswk'] = t.get('duethiswk')
-            freq_data['monthly'] = t.get('monthly')
-            freq_data['quarterly'] = t.get('quarterly')
-            tcomplete = t.get('complete')
-            tcreated = t.get('created')
-            tpid = t.get('assignee_id')
-            tlastcompleted = t.get('last_completed')
-            tasks.append(Task(_id=tid, 
-                              _desc=tdesc, 
-                              _location=tl, 
-                              _complete=tcomplete, 
-                              _assignee_id=tpid, 
-                              _created=tcreated, 
-                              _last_completed=tlastcompleted, 
-                              _freq_data=freq_data))
+        
+           id = t.get('id')
+           start = t.get('start')
+           end = t.get('end')
+           title = t.get('title')
+           description = t.get('description')
+           created_on = t.get('created_on')
+           updated_on = t.get('updated_on')
+           end_recurring_period = t.get('end_recurring_period')
+           color_event = t.get('color')
+           location = t.get('location')
+           creator = t.get('creator')
+           rule = t.get('rule')
+           calendar = t.get('calendar')
+           assignee = t.get('assignee')
+       
+           tasks.append(Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee))
         return tasks
         
     def getAllPlayers(self):
@@ -121,27 +106,23 @@ class NetworkDatabase:
             #print(resp.json())
             task_elements = resp.json()
             for t in task_elements:
-                freq_data = {}
-                tid = t.get('id')
-                tdesc = t.get('desc')
-                tl = t.get('location')
-                freq_data['once'] = t.get('once')
-                freq_data['monday'] = t.get('monday')
-                freq_data['tuesday'] = t.get('tuesday')
-                freq_data['wednesday'] = t.get('wednesday')
-                freq_data['thursday'] = t.get('thursday')
-                freq_data['friday'] = t.get('friday')
-                freq_data['saturday'] = t.get('saturday')
-                freq_data['sunday'] = t.get('sunday')
-                freq_data['biweekly'] = t.get('biweekly')
-                freq_data['duethiswk'] = t.get('duethiswk')
-                freq_data['monthly'] = t.get('monthly')
-                freq_data['quarterly'] = t.get('quarterly')
-                tcomplete = t.get('complete')
-                tcreated = t.get('created')
-                tpid = t.get('assignee_id')
-                tlastcompleted = t.get('last_completed')
-                tasks.append(Task(_id=tid, _desc=tdesc, _location=tl, _complete=tcomplete, _assignee_id=tpid, _created=tcreated, _last_completed=tlastcompleted, _freq_data=freq_data))
+            
+                id = t.get('id')
+                start = t.get('start')
+                end = t.get('end')
+                title = t.get('title')
+                description = t.get('description')
+                created_on = t.get('created_on')
+                updated_on = t.get('updated_on')
+                end_recurring_period = t.get('end_recurring_period')
+                color_event = t.get('color')
+                location = t.get('location')
+                creator = t.get('creator')
+                rule = t.get('rule')
+                calendar = t.get('calendar')
+                assignee = t.get('assignee')
+       
+                tasks.append(Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee))
             new_player.tasks = tasks
             players.append(new_player)
         return players
@@ -161,28 +142,28 @@ class NetworkDatabase:
             print('ERROR: Failed to get response from server')
             return []
         t = resp.json()
-        freq_data = {}
-        tid = t.get('id')
-        tdesc = t.get('desc')
+        
+        tpk = t.get('pk')
+        tdesc = t.get('description')
         tl = t.get('location')
-        freq_data['once'] = t.get('once')
-        freq_data['monday'] = t.get('monday')
-        freq_data['tuesday'] = t.get('tuesday')
-        freq_data['wednesday'] = t.get('wednesday')
-        freq_data['thursday'] = t.get('thursday')
-        freq_data['friday'] = t.get('friday')
-        freq_data['saturday'] = t.get('saturday')
-        freq_data['sunday'] = t.get('sunday')
-        freq_data['biweekly'] = t.get('biweekly')
-        freq_data['duethiswk'] = t.get('duethiswk')
-        freq_data['monthly'] = t.get('monthly')
-        freq_data['quarterly'] = t.get('quarterly')
-        tcomplete = t.get('complete')
-        tcreated = t.get('created')
-        tpid = t.get('assignee_id')
-        tlastcompleted = t.get('last_completed')
-        return Task(_id=tid, _desc=tdesc, _location=tl, _complete=tcomplete, _assignee_id=tpid, _created=tcreated, _last_completed=tlastcompleted, _freq_data=freq_data)
-            
+
+        id = t.get('id')
+        start = t.get('start')
+        end = t.get('end')
+        title = t.get('title')
+        description = t.get('description')
+        created_on = t.get('created_on')
+        updated_on = t.get('updated_on')
+        end_recurring_period = t.get('end_recurring_period')
+        color_event = t.get('color')
+        location = t.get('location')
+        creator = t.get('creator')
+        rule = t.get('rule')
+        calendar = t.get('calendar')
+        assignee = t.get('assignee')
+
+        return Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee)
+           
             
     def serialize(self, el):
         if type(el) == Task:
@@ -192,7 +173,7 @@ class NetworkDatabase:
             jstr['location'] = el.location
             jstr['complete'] = el.complete
             jstr['created'] = el.created
-            jstr['last_completed'] = el.last_completed
+            #jstr['last_completed'] = el.last_completed
             
             jstr['once'] = el.freq_data['once']
             jstr['monday'] = el.freq_data['monday']
