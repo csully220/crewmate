@@ -4,6 +4,7 @@ from lib.task import *
 import requests
 import datetime
 import pytz
+from lib.schedule import Occurrence
 
 class NetworkDatabase:
     
@@ -12,9 +13,28 @@ class NetworkDatabase:
         self.server_port = _port
         self.urlbase = 'http://' + self.server_ip + ':' + self.server_port + '/taskapi/'
 
+    def getTasksToday(self, playerid):
+        query = '?playerid=' + str(playerid) + '&period=week'
+        try:
+            resp = requests.get(self.urlbase + 'tasks/' + query)
+        except:
+            print('ERROR: Failed to get response from server')
+            return []
+        oc = resp.json()
+        occurrences = []
+        for o in oc:
+            new_o = Occurrence()
+            new_o.event = o.get('event')
+            new_o.title = o.get('title')
+            new_o.description = o.get('description')
+            new_o.start = o.get('start')
+            new_o.end = o.get('end')
+            occurrences.append(new_o)
+        return occurrences
+
     def getPlayer(self, pk):
         try:
-            resp = requests.get(self.urlbase + 'players/' + str(pk))
+            resp = requests.get(self.urlbase + 'player/' + str(pk))
         except:
             print('ERROR: Failed to get response from server')
             return []
@@ -23,35 +43,35 @@ class NetworkDatabase:
         pc = pe.get('color')
         pid = pe.get('id')
         new_player = Player(pid, pn, pc)
-        pid = pe.get('id')
-        query = {'assignee':pid}
-        try:
-            resp = requests.get(self.urlbase + 'playertasks/', params=query)
-        except:
-            print('ERROR: Failed to get response from server')
-            return []
-        tasks = []
-        print(resp.json())
-        task_elements = resp.json()
-        for t in task_elements:
-        
-            id = t.get('id')
-            start = t.get('start')
-            end = t.get('end')
-            title = t.get('title')
-            description = t.get('description')
-            created_on = t.get('created_on')
-            updated_on = t.get('updated_on')
-            end_recurring_period = t.get('end_recurring_period')
-            color_event = t.get('color')
-            location = t.get('location')
-            creator = t.get('creator')
-            rule = t.get('rule')
-            calendar = t.get('calendar')
-            assignee = t.get('assignee')
-            
-            tasks.append(Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee))
-        new_player.tasks = tasks
+        #pid = pe.get('id')
+        #query = {'assignee':pid}
+        #try:
+        #    resp = requests.get(self.urlbase + 'playertasks/', params=query)
+        #except:
+        #    print('ERROR: Failed to get response from server')
+        #    return []
+        #tasks = []
+        #print(resp.json())
+        #task_elements = resp.json()
+        #for t in task_elements:
+        #
+        #    id = t.get('id')
+        #    start = t.get('start')
+        #    end = t.get('end')
+        #    title = t.get('title')
+        #    description = t.get('description')
+        #    created_on = t.get('created_on')
+        #    updated_on = t.get('updated_on')
+        #    end_recurring_period = t.get('end_recurring_period')
+        #    color_event = t.get('color')
+        #    location = t.get('location')
+        #    creator = t.get('creator')
+        #    rule = t.get('rule')
+        #    calendar = t.get('calendar')
+        #    assignee = t.get('assignee')
+        #    
+        #    tasks.append(Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee))
+        #new_player.tasks = tasks
         return new_player
 
     def getPlayerTasks(self, player_id):
@@ -84,7 +104,7 @@ class NetworkDatabase:
         
     def getAllPlayers(self):
         try:
-            resp = requests.get(self.urlbase + 'players')
+            resp = requests.get(self.urlbase + 'playerlist')
         except:
             print('ERROR: Failed to get response from server')
             return []
@@ -97,33 +117,33 @@ class NetworkDatabase:
             new_player = Player(pid, pn, pc)
             pid = pe.get('id')
             query = {'assignee':pid}
-            try:
-                resp = requests.get(self.urlbase + 'playertasks/', params=query)
-            except:
-                print('ERROR: Failed to get response from server')
-                return []
-            tasks = []
-            #print(resp.json())
-            task_elements = resp.json()
-            for t in task_elements:
-            
-                id = t.get('id')
-                start = t.get('start')
-                end = t.get('end')
-                title = t.get('title')
-                description = t.get('description')
-                created_on = t.get('created_on')
-                updated_on = t.get('updated_on')
-                end_recurring_period = t.get('end_recurring_period')
-                color_event = t.get('color')
-                location = t.get('location')
-                creator = t.get('creator')
-                rule = t.get('rule')
-                calendar = t.get('calendar')
-                assignee = t.get('assignee')
-       
-                tasks.append(Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee))
-            new_player.tasks = tasks
+            #try:
+            #    resp = requests.get(self.urlbase + 'playertasks/', params=query)
+            #except:
+            #    print('ERROR: Failed to get response from server')
+            #    return []
+            #tasks = []
+            ##print(resp.json())
+            #task_elements = resp.json()
+            #for t in task_elements:
+            #
+            #    id = t.get('id')
+            #    start = t.get('start')
+            #    end = t.get('end')
+            #    title = t.get('title')
+            #    description = t.get('description')
+            #    created_on = t.get('created_on')
+            #    updated_on = t.get('updated_on')
+            #    end_recurring_period = t.get('end_recurring_period')
+            #    color_event = t.get('color')
+            #    location = t.get('location')
+            #    creator = t.get('creator')
+            #    rule = t.get('rule')
+            #    calendar = t.get('calendar')
+            #    assignee = t.get('assignee')
+            #
+            #    tasks.append(Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee))
+            #new_player.tasks = tasks
             players.append(new_player)
         return players
 

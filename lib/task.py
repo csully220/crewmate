@@ -13,11 +13,12 @@ class Task:
         self.updated_on = _updated
         self.end_recurring_period = _end_rec
         self.color_event = _color
-        self.location_ = _location
+        self.location = _location
         self.creator = _creator
         self.rule = _rule
         self.calendar = _calendar
         self.assignee = _assignee
+        self.complete = False;
         
         
     def isOverDue(self):
@@ -25,4 +26,3 @@ class Task:
         #print("last  " + self.last_completed)
         now = datetime.datetime.now(datetime.timezone.utc)
         print("now  " + datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'))
-            

@@ -21,7 +21,6 @@ class App:
     buttons = []
     taskstosave = {}
     fullscreen = False
-    fullscreen_prev = False
 
     def __init__(self):
         self.clock = pygame.time.Clock()
@@ -91,9 +90,21 @@ class App:
         self.round_start_sound = pygame.mixer.Sound(r'data/audio/round_start.wav')
         self.task_incomplete_sound = pygame.mixer.Sound(r'data/audio/task_incomplete.wav')
 
+
+
+
+
+
+
     def on_event(self, event):
         if event.type == QUIT:
             self.running = False
+
+
+
+
+
+
 
     def on_loop(self):
         self.sprites.update()
@@ -114,10 +125,10 @@ class App:
                 icon_width = 90 + margin
                 # totplyriconwidth = number of players - x (thumbnail width + margin)
                 totplyriconwidth = (len(self.players) -1) * icon_width
-                print(totplyriconwidth)
+                #print(totplyriconwidth)
                 # offset by half to align centers
                 pbx = (self.windowWidth/2) - (totplyriconwidth/2) + (margin/2)
-                print(pbx)
+                #print(pbx)
                 pby = 360
                 i = 0
                 for pn, po in self.players.items():
@@ -138,11 +149,13 @@ class App:
                 _y = 240
                 _yofs = 40
                 # PLAYER TASK CHECKBOXES
-                playertasks = self.player.tasks
+                playertasks = self.db.getTasksToday(self.player.id)
+                #playertasks = self.player.tasks
+                
                 for _t in playertasks:
-                    _t.isOverDue()
-                    _strtsk = _t.location + ' - ' + _t.desc
-                    _chkbx = TaskCheckbox(_t.complete, _strtsk, _x - 30, _y + 12, _t.id)
+                    #_t.isOverDue()
+                    _strtsk = _t.title + ' - ' + _t.description
+                    _chkbx = TaskCheckbox(_t.complete, _strtsk, _x - 30, _y + 12, _t.event)
                     _y = _y + _yofs
                     self.addWidget(_chkbx)
                 # COMMON TASK CHECKBOXES
@@ -152,11 +165,17 @@ class App:
                 if self.player.name != 'Common':
                     #commontasks = self.db.getPlayerTasks(self.players['Common'].id)
                     for _t in self.players['Common'].tasks:
-                        _strtsk = _t.location + ' - ' + _t.desc
-                        _chkbx = TaskCheckbox(_t.complete, _strtsk, _x - 30, _y + 12, _t.id)
+                        _strtsk = _t.location + ' - ' + _t.title
+                        _chkbx = TaskCheckbox(_t.complete, _strtsk, _x - 30, _y + 12, _t.event)
                         _y = _y + _yofs
                         self.addWidget(_chkbx)
                 self.addWidget(Button('exit', 'Back', 100, 900))
+
+
+
+
+
+
 
     def on_render(self):
         self.display_surf.blit(self.bg, (0, 0))
@@ -213,8 +232,15 @@ class App:
         pygame.display.flip()
 
 
+
+
+
     def on_cleanup(self):
         pygame.quit()
+
+
+
+
  
     def on_execute(self):
         if self.on_init() == False:
