@@ -32,6 +32,16 @@ class NetworkDatabase:
             occurrences.append(new_o)
         return occurrences
 
+    def updateOccurrence(self, occurrence):
+        try:
+            query = '?playerid=' + str(playerid) + '&period=week'
+            resp = requests.put(self.urlbase + 'tasks/' + str(task.id) + '/', json=self.serialize(task))
+        except:
+            print('ERROR: Failed to get response from server')
+            return
+        print(resp.json())
+
+
     def getPlayer(self, pk):
         try:
             resp = requests.get(self.urlbase + 'player/' + str(pk))
@@ -111,45 +121,17 @@ class NetworkDatabase:
         player_elements = resp.json()
         players = []
         for pe in player_elements:
-            pn = pe.get('name')
-            pc = pe.get('color')
             pid = pe.get('id')
-            new_player = Player(pid, pn, pc)
-            pid = pe.get('id')
-            query = {'assignee':pid}
-            #try:
-            #    resp = requests.get(self.urlbase + 'playertasks/', params=query)
-            #except:
-            #    print('ERROR: Failed to get response from server')
-            #    return []
-            #tasks = []
-            ##print(resp.json())
-            #task_elements = resp.json()
-            #for t in task_elements:
-            #
-            #    id = t.get('id')
-            #    start = t.get('start')
-            #    end = t.get('end')
-            #    title = t.get('title')
-            #    description = t.get('description')
-            #    created_on = t.get('created_on')
-            #    updated_on = t.get('updated_on')
-            #    end_recurring_period = t.get('end_recurring_period')
-            #    color_event = t.get('color')
-            #    location = t.get('location')
-            #    creator = t.get('creator')
-            #    rule = t.get('rule')
-            #    calendar = t.get('calendar')
-            #    assignee = t.get('assignee')
-            #
-            #    tasks.append(Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee))
-            #new_player.tasks = tasks
+            color = pe.get('color')
+            new_player = Player(pid, color)
+            new_player.name = pe.get('name')
+            new_player.account_balance = pe.get('account_balance')
             players.append(new_player)
         return players
 
-    def updateTaskElement(self, task):
+    def updateOccurrence(self, occ):
         try:
-            resp = requests.put(self.urlbase + 'tasks/' + str(task.id) + '/', json=self.serialize(task))
+            resp = requests.post(self.urlbase + 'occurrences/', json=self.serialize(occ))
         except:
             print('ERROR: Failed to get response from server')
             return
@@ -185,28 +167,25 @@ class NetworkDatabase:
         return Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee)
            
             
-    def serialize(self, el):
-        if type(el) == Task:
+    def serialize(self, oc):
+        if type(oc) == Occurrence:
             jstr = {}
-            jstr['id'] = el.id
-            jstr['desc'] = el.desc
-            jstr['location'] = el.location
-            jstr['complete'] = el.complete
-            jstr['created'] = el.created
-            #jstr['last_completed'] = el.last_completed
-            
-            jstr['once'] = el.freq_data['once']
-            jstr['monday'] = el.freq_data['monday']
-            jstr['tuesday'] = el.freq_data['tuesday']
-            jstr['wednesday'] = el.freq_data['wednesday']
-            jstr['thursday'] = el.freq_data['thursday']
-            jstr['friday'] = el.freq_data['friday']
-            jstr['saturday'] = el.freq_data['saturday']
-            jstr['sunday'] = el.freq_data['sunday']
-            jstr['biweekly'] = el.freq_data['biweekly']
-            jstr['duethiswk'] = el.freq_data['duethiswk']
-            jstr['monthly'] = el.freq_data['monthly']
-            jstr['quarterly'] = el.freq_data['quarterly']
+            jstr['title'] = oc.title
+            jstr['description'] = oc.description
+            jstr['start'] = oc.start
+            jstr['end'] = oc.end
+            jstr['original_start'] = oc.original_start
+            jstr['original_end'] = oc.original_end
+            jstr['cancelled'] = oc.cancelled
+            now = datetime.now(timezone.utc)
+            dt = now.isoformat(timespec='seconds')
+            dt1 = dt[:-6]
+            dt2 = dt1 + 'Z'
+            #jstr['updated_on'] = dt2
+            jstr['completed'] = oc.completed
+            if oc.completed:
+                jstr['completed_on'] = dt2
+            jstr['event'] = oc.event
             
             return jstr
 

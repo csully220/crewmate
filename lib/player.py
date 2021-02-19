@@ -6,14 +6,11 @@ class Player(pygame.sprite.Sprite):
     direction = 'RIGHT'
     chosen = False
     
-    def __init__(self, _id, _name, _color, _tasks=[]):
+    def __init__(self, id, color):
         super().__init__()
-        self.id = _id
-        self.name = _name
-        self.color = _color
-        self.tasks = _tasks
-        _plyrimgstr = './data/images/players/' + _color + '_small.png'
-        #_plyrimgstr = './data/red_plyr.png'
+        self.id = id
+        self.color = color
+        _plyrimgstr = './data/images/players/' + color + '_small.png'
         self.rightimg = pygame.image.load(_plyrimgstr).convert()
         self.leftimg = pygame.transform.flip(self.rightimg, True, False)
         self.img = self.rightimg
@@ -25,7 +22,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
-        #self.btn_choose = PlayerButton(self.color,self.name)
+        self.calendar = 0
 
     def moveRight(self):
         if self.dx < 8:

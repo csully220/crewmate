@@ -42,7 +42,7 @@ class Checkbox():
         surface.blit(_desc,(self.x + 30,self.y - 12))
 
 class TaskCheckbox(Checkbox):
-    def __init__(self, _checked=False, _label='', _x=0, _y=0, _id=0):
+    def __init__(self, _checked=True, _label='', _x=0, _y=0, _id=0):
         self.id = _id
         self.checked = _checked
         self.label = _label

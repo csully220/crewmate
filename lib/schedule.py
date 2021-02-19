@@ -1,18 +1,23 @@
+import datetime
+
+
 class Occurrence:
-    event = ''#models.ForeignKey(Event, on_delete=models.CASCADE, verbose_name=_("event"))
-    title = '' #models.CharField(_("title"), max_length=255, blank=True)
-    description = '' #models.TextField(_("description"), blank=True)
-    start = '' #models.DateTimeField(_("start"), db_index=True)
-    end = '' #models.DateTimeField(_("end"), db_index=True)
-    cancelled = False #models.BooleanField(_("cancelled"), default=False)
-    original_start = '' #models.DateTimeField(_("original start"))
-    original_end = '' #models.DateTimeField(_("original end"))
-    #created_on = '' #models.DateTimeField(_("created on"), auto_now_add=True)
-    #updated_on = '' #models.DateTimeField(_("updated on"), auto_now=True)
+    title = ''
+    description = ''
+    start = ''
+    end = ''
+    cancelled = False
+    original_start = ''
+    original_end = ''
+    created_on = ''
+    updated_on = ''
+    completed = False
+    completed_on = None
+    event = ''
 
     @property
-    def complete(self):
-        return (self.description == 'complete')
+    def taskid(self):
+        return (self.event)
 
     @property
     def seconds(self):
@@ -25,8 +30,8 @@ class Occurrence:
     @property
     def hours(self):
         return float(self.seconds) / 3600
-         
-    def get_from_JSON(self, json):
+
+    def from_JSON(cls, json):
         oc = json
         occurrences = []
         for o in oc:
@@ -36,11 +41,10 @@ class Occurrence:
             o.description = oc.get('description')
             o.start = oc.get('start')
             o.end = oc.get('end')
+            o.completed = oc.get('completed')
+            o.completed_on = oc.get('completed_on')
             occurrences.append(new_o)
         return occurrences
-
-
-
 
 class Calendar:
 
