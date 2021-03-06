@@ -149,7 +149,7 @@ class App:
                 _y = 240
                 _yofs = 40
                 if self.player.name != 'Common':
-                    commontasks = self.db.getTasksToday(self.players['Common'].id)
+                    commontasks = self.db.getOccurrences(self.players['Common'].id)
                     for _t in commontasks:
                         _strtsk = _t.title
                         _chkbx = TaskCheckbox(_t.completed, _strtsk, _x - 30, _y + 12, _t.event)
@@ -243,8 +243,8 @@ class App:
                                 #print('Chose ' + _pb.name)
                                 self.sprites.remove(self.player)
                                 self.player = self.players[_pb.name]
-                                self.player.tasks = self.db.getTasksToday(self.player.id)
-                                self.players['Common'].tasks = self.db.getTasksToday(self.players['Common'].id)
+                                self.player.tasks = self.db.getOccurrences(self.player.id)
+                                self.players['Common'].tasks = self.db.getOccurrences(self.players['Common'].id)
                                 self.sprites.add(self.player)
                                 _plyrclkd = True
                         if(_plyrclkd):
@@ -292,7 +292,7 @@ class App:
                                 if _b.action == 'exit':
                                     for t in self.taskstosave:
                                         print("Task to save " + t.title)
-                                        self.db.updateOccurrence(t)
+                                        self.db.updateOccurrence(t, self.player.id)
                                     self.menu = 'WELCOME'
                                     self.bg = pygame.image.load(r'.\data\images\bg_title.png')
 

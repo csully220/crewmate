@@ -13,10 +13,11 @@ class NetworkDatabase:
         self.server_port = _port
         self.urlbase = 'http://' + self.server_ip + ':' + self.server_port + '/taskapi/'
 
-    def getTasksToday(self, playerid):
-        query = '?playerid=' + str(playerid) + '&period=week'
+
+    def getOccurrences(self, playerid, period='week'):
+        query = '?playerid=' + str(playerid) + '&period=' + period
         try:
-            resp = requests.get(self.urlbase + 'tasks/' + query)
+            resp = requests.get(self.urlbase + 'occurrences/' + query)
         except:
             print('ERROR: Failed to get response from server')
             return []
@@ -29,18 +30,10 @@ class NetworkDatabase:
             new_o.description = o.get('description')
             new_o.start = o.get('start')
             new_o.end = o.get('end')
+            new_o.original_start = o.get('original_start')
+            new_o.original_end = o.get('original_end')
             occurrences.append(new_o)
         return occurrences
-
-    def updateOccurrence(self, occurrence):
-        try:
-            query = '?playerid=' + str(playerid) + '&period=week'
-            resp = requests.put(self.urlbase + 'tasks/' + str(task.id) + '/', json=self.serialize(task))
-        except:
-            print('ERROR: Failed to get response from server')
-            return
-        print(resp.json())
-
 
     def getPlayer(self, pk):
         try:
@@ -53,36 +46,8 @@ class NetworkDatabase:
         pc = pe.get('color')
         pid = pe.get('id')
         new_player = Player(pid, pn, pc)
-        #pid = pe.get('id')
-        #query = {'assignee':pid}
-        #try:
-        #    resp = requests.get(self.urlbase + 'playertasks/', params=query)
-        #except:
-        #    print('ERROR: Failed to get response from server')
-        #    return []
-        #tasks = []
-        #print(resp.json())
-        #task_elements = resp.json()
-        #for t in task_elements:
-        #
-        #    id = t.get('id')
-        #    start = t.get('start')
-        #    end = t.get('end')
-        #    title = t.get('title')
-        #    description = t.get('description')
-        #    created_on = t.get('created_on')
-        #    updated_on = t.get('updated_on')
-        #    end_recurring_period = t.get('end_recurring_period')
-        #    color_event = t.get('color')
-        #    location = t.get('location')
-        #    creator = t.get('creator')
-        #    rule = t.get('rule')
-        #    calendar = t.get('calendar')
-        #    assignee = t.get('assignee')
-        #    
-        #    tasks.append(Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee))
-        #new_player.tasks = tasks
         return new_player
+
 
     def getPlayerTasks(self, player_id):
         try:
@@ -112,6 +77,7 @@ class NetworkDatabase:
            tasks.append(Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee))
         return tasks
         
+        
     def getAllPlayers(self):
         try:
             resp = requests.get(self.urlbase + 'playerlist')
@@ -128,14 +94,6 @@ class NetworkDatabase:
             new_player.account_balance = pe.get('account_balance')
             players.append(new_player)
         return players
-
-    def updateOccurrence(self, occ):
-        try:
-            resp = requests.post(self.urlbase + 'occurrences/', json=self.serialize(occ))
-        except:
-            print('ERROR: Failed to get response from server')
-            return
-        print(resp.json())
 
     def getTask(self,pk):
         try:
@@ -163,10 +121,18 @@ class NetworkDatabase:
         rule = t.get('rule')
         calendar = t.get('calendar')
         assignee = t.get('assignee')
-
+        
         return Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee)
-           
-            
+
+    def updateOccurrence(self, occ, playerid):
+        try:
+            jsondict = self.serialize(occ)
+            resp = requests.post(self.urlbase + 'occurrences/?playerid=' + str(playerid) + '&period=week', json=jsondict)
+        except Exception as e:
+            print('ERROR: Failed to get response from server')
+            print(e)
+            return
+        
     def serialize(self, oc):
         if type(oc) == Occurrence:
             jstr = {}
@@ -177,17 +143,18 @@ class NetworkDatabase:
             jstr['original_start'] = oc.original_start
             jstr['original_end'] = oc.original_end
             jstr['cancelled'] = oc.cancelled
-            now = datetime.now(timezone.utc)
+            now = datetime.datetime.now(datetime.timezone.utc)
             dt = now.isoformat(timespec='seconds')
             dt1 = dt[:-6]
             dt2 = dt1 + 'Z'
-            #jstr['updated_on'] = dt2
             jstr['completed'] = oc.completed
             if oc.completed:
                 jstr['completed_on'] = dt2
             jstr['event'] = oc.event
             
             return jstr
+        else:
+            print('Serialize failed')
 
 class XmlDatabase:
 
