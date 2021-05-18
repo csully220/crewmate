@@ -7,14 +7,14 @@ import pytz
 from lib.schedule import Occurrence
 
 class NetworkDatabase:
-    
+
     def __init__(self, _ip='127.0.0.1', _port='8000'):
         self.server_ip = _ip
         self.server_port = _port
         self.urlbase = 'http://' + self.server_ip + ':' + self.server_port + '/taskapi/'
 
 
-    def getOccurrences(self, playerid, period='week'):
+    def getOccurrences(self, playerid, period='day'):
         query = '?playerid=' + str(playerid) + '&period=' + period
         try:
             resp = requests.get(self.urlbase + 'occurrences/' + query)
@@ -30,8 +30,13 @@ class NetworkDatabase:
             new_o.description = o.get('description')
             new_o.start = o.get('start')
             new_o.end = o.get('end')
+            new_o.cancelled = o.get('cancelled')
             new_o.original_start = o.get('original_start')
             new_o.original_end = o.get('original_end')
+            new_o.completed = o.get('completed')
+            new_o.completed_on = o.get('completed_on')
+            new_o.failed = o.get('failed')
+            
             occurrences.append(new_o)
         return occurrences
 
@@ -76,8 +81,7 @@ class NetworkDatabase:
        
            tasks.append(Task(id, start, end, title, description, created_on, updated_on, end_recurring_period, color_event, location, creator, rule, calendar, assignee))
         return tasks
-        
-        
+
     def getAllPlayers(self):
         try:
             resp = requests.get(self.urlbase + 'playerlist')
@@ -127,12 +131,12 @@ class NetworkDatabase:
     def updateOccurrence(self, occ, playerid):
         try:
             jsondict = self.serialize(occ)
-            resp = requests.post(self.urlbase + 'occurrences/?playerid=' + str(playerid) + '&period=week', json=jsondict)
+            resp = requests.post(self.urlbase + 'occurrences/?playerid=' + str(playerid) + '&period=day', json=jsondict)
         except Exception as e:
             print('ERROR: Failed to get response from server')
             print(e)
             return
-        
+
     def serialize(self, oc):
         if type(oc) == Occurrence:
             jstr = {}

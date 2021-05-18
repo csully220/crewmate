@@ -36,17 +36,6 @@ class App:
             port = config['network']['server_port']
             self.db = NetworkDatabase(ip, port)
 
-        #for p in self.players:
-        #    print("Players:")
-        #    print(p.name)
-        #    print(p.color)
-        #    print("Tasks:")
-        #    for t in p.tasks:
-        #        print(t.name)
-        #        print(t.location)
-        #        print(t.complete)
-        #format the menus
-
     def on_init(self):
         pygame.init()
         pygame.font.init()
@@ -93,7 +82,6 @@ class App:
         if event.type == QUIT:
             self.running = False
 
-
     def on_loop(self):
         self.sprites.update()
         self.updateFloaters()
@@ -113,20 +101,18 @@ class App:
                 icon_width = 90 + margin
                 # totplyriconwidth = number of players - x (thumbnail width + margin)
                 totplyriconwidth = (len(self.players) -1) * icon_width
-                #print(totplyriconwidth)
+                # print(totplyriconwidth)
                 # offset by half to align centers
                 pbx = (self.windowWidth/2) - (totplyriconwidth/2) + (margin/2)
-                #print(pbx)
                 pby = 360
                 i = 0
                 for pn, po in self.players.items():
-                    if pn != 'Common':
-                        _btn = PlayerButton(po.color, po.name)
-                        _btn.y = pby
-                        _btn.x = pbx
-                        self.addWidget(_btn)
-                        i += 1
-                        pbx += icon_width
+                    _btn = PlayerButton(po.color, po.name)
+                    _btn.y = pby
+                    _btn.x = pbx
+                    self.addWidget(_btn)
+                    i += 1
+                    pbx += icon_width
                 
                 self.addWidget(Button('common', 'Common', 760, 660))
                 self.addWidget(Button('tasks', 'Progress', 970, 660))
@@ -141,20 +127,21 @@ class App:
 
                 for _t in playertasks:
                     _strtsk = _t.title + ' - ' + _t.description
-                    _chkbx = TaskCheckbox(_t.completed, _strtsk, _x - 30, _y + 12, _t.event)
+                    _chkbx = TaskCheckbox(_t.completed, _strtsk, _x - 30, _y + 12, self.player.id)
                     _y = _y + _yofs
                     self.addWidget(_chkbx)
                 # COMMON TASK CHECKBOXES
-                _x = 960
-                _y = 240
-                _yofs = 40
-                if self.player.name != 'Common':
-                    commontasks = self.db.getOccurrences(self.players['Common'].id)
-                    for _t in commontasks:
-                        _strtsk = _t.title
-                        _chkbx = TaskCheckbox(_t.completed, _strtsk, _x - 30, _y + 12, _t.event)
-                        _y = _y + _yofs
-                        self.addWidget(_chkbx)
+                #_x = 960
+                #_y = 240
+                #_yofs = 40
+                #if self.player.name != 'Common':
+                #    commontasks = self.db.getOccurrences(self.players['Common'].id)
+                #   for _t in commontasks:
+                #        _strtsk = _t.title
+                #        _chkbx = TaskCheckbox(_t.completed, _strtsk, _x - 30, _y + 12, self.players['Common'].id)
+                #        _y = _y + _yofs
+                #        _chkbx.id = self.players['Common'].id
+                #        self.addWidget(_chkbx)
                 self.addWidget(Button('exit', 'Back', 100, 900))
 
     def on_render(self):
@@ -193,9 +180,10 @@ class App:
             pygame.draw.rect(self.display_surf, green, tbar_fill)
             self.display_surf.blit(tbar, (60, 60))
 
+            # display 'Crewmate' or 'Imposter' at the top of screen
             role = pygame.image.load(r'.\data\images\crewmate.png')
             self.display_surf.blit(role, (1060, 50))
-            
+
             if self.player.name != 'Common':
                 _lbl = self.player.name + '\'s Tasks:'
             else:
@@ -204,10 +192,10 @@ class App:
             for _t in self.tskbtns:
                 _t.draw(self.display_surf)
 
-            _lbl = 'Common Tasks:'
-            self.display_surf.blit(self.font_med.render(_lbl , False, white), (960,180))
+            #_lbl = 'Common Tasks:'
+            #self.display_surf.blit(self.font_med.render(_lbl , False, white), (960,180))
             for _b in self.buttons:
-                _b.draw(self.display_surf)    
+                _b.draw(self.display_surf)
         #self.sprites.draw(self.display_surf)
         pygame.display.flip()
 
@@ -240,11 +228,8 @@ class App:
                         _plyrclkd = False
                         for _pb in self.plyrbtns:
                             if _pb.get_rect().collidepoint(mspos):
-                                #print('Chose ' + _pb.name)
                                 self.sprites.remove(self.player)
-                                self.player = self.players[_pb.name]
-                                self.player.tasks = self.db.getOccurrences(self.player.id)
-                                self.players['Common'].tasks = self.db.getOccurrences(self.players['Common'].id)
+                                self.setPlayer(_pb.name)
                                 self.sprites.add(self.player)
                                 _plyrclkd = True
                         if(_plyrclkd):
@@ -262,8 +247,9 @@ class App:
                             if _b.rect.collidepoint(mspos):
                                 #print(_b.action)
                                 if _b.action == 'common':
-                                    self.player = self.players['Common']
+                                    self.setPlayer('Common')
                                     self.menu = 'TASKS'
+                                    self.spawn_sound.play()
                                     self.bg = pygame.image.load(r'.\data\images\bg_empty.png')
                                 if _b.action == 'exit':
                                     # EXIT
@@ -278,13 +264,13 @@ class App:
                             if _tbrect.collidepoint(mspos):
                                 if tb.id == self.players['Common'].id:
                                     self.players['Common'].tasks[idx].completed = not self.players['Common'].tasks[idx].completed
-                                    self.taskstosave.append(self.players['Common'].tasks[idx])
+                                    self.db.updateOccurrence(self.players['Common'].tasks[idx], self.player.id)
                                 else:
-                                    self.task_incomplete_sound.play()
+                                    #self.task_incomplete_sound.play()
                                     self.player.tasks[idx].completed = not self.player.tasks[idx].completed
-                                    self.taskstosave.append(self.player.tasks[idx])
+                                    self.db.updateOccurrence(self.player.tasks[idx], self.player.id)
                                     self.lastMenu = 'NONE'
-                                    break;
+                                    #break;
                             idx += 1
                         for _b in self.buttons:
                         # BACK
@@ -292,10 +278,9 @@ class App:
                                 if _b.action == 'exit':
                                     for t in self.taskstosave:
                                         print("Task to save " + t.title)
-                                        self.db.updateOccurrence(t, self.player.id)
+                                        #self.db.updateOccurrence(t, self.player.id)
                                     self.menu = 'WELCOME'
                                     self.bg = pygame.image.load(r'.\data\images\bg_title.png')
-
                     print(mspos)
                 elif event.type == pygame.KEYDOWN:
 ##                    if event.key == pygame.K_RIGHT:
@@ -342,7 +327,6 @@ class App:
 
             self.clock.tick(30)
 
-        #self.db.saveAll()
         self.on_cleanup()
 
     def addWidget(self, widget):
@@ -370,6 +354,12 @@ class App:
             self.floaters.remove(f)
         if removed == True:
             self.floaters.add(Floater(random.randrange(1,6)))
+
+            
+    def setPlayer(self, playername=''):
+        self.player = self.players[playername]
+        self.player.tasks = self.db.getOccurrences(self.player.id)
+
 
 if __name__ == "__main__" :
     theApp = App()
